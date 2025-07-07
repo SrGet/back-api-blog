@@ -8,3 +8,11 @@ services:
       - 'MYSQL_PASSWORD=domino123'
     ports:
       - '3307:3306'
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.3.0
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    command: [ "start-dev", "--http-port=9090", "-d"]
+    ports:
+      - '9090:9090'
