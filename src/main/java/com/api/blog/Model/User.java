@@ -44,6 +44,7 @@ public class User {
     private List<Post> posts;
 
     @CreatedDate
+    @Column(updatable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate
