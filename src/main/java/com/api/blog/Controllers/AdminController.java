@@ -7,12 +7,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/user")
-public class UserController {
+@RequestMapping("/api/admin")
+public class AdminController {
 
     @GetMapping("/hi")
-    @PreAuthorize("hasRole('user')")
-    public ResponseEntity<String> hi(){
-        return ResponseEntity.ok("Hi from test-secure endpoint");
+    @PreAuthorize("hasRole('admin')")
+    public ResponseEntity<String> hi (){
+        return ResponseEntity.ok("Hi from admin endpoint");
     }
 }
