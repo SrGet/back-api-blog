@@ -18,6 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Where(clause = "active = true")
+@Table(name = "users")
 public class User {
 
     @Id
@@ -26,12 +27,10 @@ public class User {
 
     private String name;
 
-    @Column(name = "last_name")
     private String lastname;
 
     private String username;
 
-    private String password;
 
     private String email;
 
@@ -44,10 +43,11 @@ public class User {
     private List<Post> posts;
 
     @CreatedDate
-    @Column(updatable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate
+    @Column(name = "modified_at")
     private LocalDateTime modifiedAt;
 
 
