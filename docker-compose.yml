@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   mysql:
     image: 'mysql:8.0'
@@ -8,11 +10,45 @@ services:
       - 'MYSQL_PASSWORD=domino123'
     ports:
       - '3307:3306'
+    networks:
+      - blog-network
+    volumes:
+      - mysql_data:/var/lib/mysql
+
   keycloak:
     image: quay.io/keycloak/keycloak:26.3.0
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
-    command: [ "start-dev", "--http-port=9090", "-d"]
+    command: [ "start-dev", "--http-port=9090"]
     ports:
       - '9090:9090'
+    networks:
+      - blog-network
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '8080:8080'
+    depends_on:
+      - mysql
+      - keycloak
+    networks:
+      - blog-network
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/apiblog
+      SPRING_DATASOURCE_USERNAME: domino123
+      SPRING_DATASOURCE_PASSWORD: domino123
+      SPRING_JWT_ISSUER: http://keycloak:9090/realms/apiBlog-dev
+      SPRING_JWK: http://keycloak:9090/realms/apiBlog-dev/protocol/openid-connect/certs
+networks:
+  blog-network:
+    driver: bridge
+
+volumes:
+  keycloak_data:
+  mysql_data:
