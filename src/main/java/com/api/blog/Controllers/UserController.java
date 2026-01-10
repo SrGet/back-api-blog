@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/user")
 public class UserController {
 
-    @GetMapping("/paladin")
+    @GetMapping("/hi")
     @PreAuthorize("hasRole('user')")
     public ResponseEntity<String> hi(){
         System.out.println("Entra al endpoint secure");
