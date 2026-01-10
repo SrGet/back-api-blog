@@ -1,10 +1,15 @@
 package com.api.blog.Service;
 
 import com.api.blog.DTOs.UserDto;
+import com.api.blog.Model.Post;
 import com.api.blog.Model.User;
 import com.api.blog.Repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -15,6 +20,7 @@ public class UserService {
 
 
     public User create(UserDto userDto){
+
 
         String userId = keycloakService.create(userDto);
 
@@ -42,5 +48,13 @@ public class UserService {
 
     }
 
+    public User getUserByUsername(String username){
+        return userRepository.findByUsername(username);
+    }
 
+    public List<Post> myPosts(){
+        User user = getUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+        return user.getPosts();
+
+    }
 }
