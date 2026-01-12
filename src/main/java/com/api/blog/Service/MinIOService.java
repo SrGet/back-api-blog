@@ -20,6 +20,10 @@ public class MinIOService {
 
     public String uploadFile(MultipartFile file) {
 
+        if(file == null) {
+            return null;
+        }
+
         String key = UUID.randomUUID() + "-" + file.getOriginalFilename();
 
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
