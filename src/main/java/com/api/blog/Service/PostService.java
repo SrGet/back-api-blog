@@ -9,7 +9,7 @@ import com.api.blog.Model.User;
 import com.api.blog.Repositories.PostRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -31,6 +31,7 @@ public class PostService {
     public PostResponseDTO create(NewPostDto newPost){
 
         User user = userService.getUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+
         String keyFile = minIOService.uploadFile(newPost.getFile());
 
         try {
@@ -105,6 +106,14 @@ public class PostService {
         postRepository.save(oldPost);
         return postMapper.toResponseDto(oldPost);
 
+
+    }
+
+
+    // Get LastsPosts
+    public List<Post> getLastsPosts(Pageable pageable){
+
+        return postRepository.findAll(pageable).getContent();
 
     }
 
