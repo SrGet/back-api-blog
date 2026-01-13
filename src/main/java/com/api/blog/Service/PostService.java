@@ -90,7 +90,6 @@ public class PostService {
     }
 
     // Update Post
-
     public PostResponseDTO update(EditPostDTO editPostDTO){
 
         Post oldPost = getPostEntity(editPostDTO.getPostId());
@@ -105,9 +104,7 @@ public class PostService {
         postRepository.save(oldPost);
         return postMapper.toResponseDto(oldPost);
 
-
     }
-
 
     // Get LastsPosts
     public List<Post> getLastsPosts(Pageable pageable){

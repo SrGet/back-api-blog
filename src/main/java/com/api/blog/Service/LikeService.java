@@ -1,5 +1,6 @@
 package com.api.blog.Service;
 
+import com.api.blog.DTOs.LikeResponseDTO;
 import com.api.blog.Model.Post;
 import com.api.blog.Model.PostLike;
 import com.api.blog.Model.User;
@@ -7,7 +8,10 @@ import com.api.blog.Repositories.LikePostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -17,13 +21,18 @@ public class LikeService {
     private final PostService postService;
     private final UserService userService;
 
-    public String likePost(Long idPost){
+    @Transactional
+    public LikeResponseDTO toggleLike(Long idPost){
 
         Post post = postService.getPostEntity(idPost);
         User user = userService.getUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
 
         if(likePostRepository.existsByUserAndPost(user,post)){
-            return "Already liked.";
+            likePostRepository.deleteByUserAndPost(user,post);
+            return LikeResponseDTO.builder()
+                    .liked(false)
+                    .likeAmount(likePostRepository.countByPost(post))
+                    .build();
         }
 
         PostLike like = PostLike.builder()
@@ -33,9 +42,14 @@ public class LikeService {
                 .build();
 
         likePostRepository.save(like);
-        return "Liked.";
+        return LikeResponseDTO.builder()
+                .liked(true)
+                .likeAmount(likePostRepository.countByPost(post))
+                .build();
 
     }
+
+
 
 
 
