@@ -1,6 +1,7 @@
 package com.api.blog.Controllers;
 
 import com.api.blog.DTOs.EditPostDTO;
+import com.api.blog.DTOs.LikeResponseDTO;
 import com.api.blog.DTOs.NewPostDto;
 import com.api.blog.DTOs.PostResponseDTO;
 import com.api.blog.Service.LikeService;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/post")
@@ -61,14 +63,18 @@ public class PostController {
     }
 
     @PatchMapping("/update")
+    @PreAuthorize("hasRole('user')")
     public ResponseEntity<PostResponseDTO> update(@RequestBody EditPostDTO editPostDTO){
         return ResponseEntity.ok(postService.update(editPostDTO));
     }
 
     @PatchMapping("/like")
-    public ResponseEntity<String> likePost(@RequestParam Long postId){
-        return ResponseEntity.ok(likeService.likePost(postId));
+    @PreAuthorize("hasRole('user')")
+    public ResponseEntity<LikeResponseDTO> toggleLike(@RequestParam Long postId){
+        return ResponseEntity.ok(likeService.toggleLike(postId));
     }
+
+
 
 
 }
