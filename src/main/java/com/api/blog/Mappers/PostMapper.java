@@ -21,7 +21,6 @@ public class PostMapper {
                 .message(post.getMessage())
                 .imgUrl(post.getImageUrl())
                 .user("@"+post.getUser().getUsername())
-                .likes(post.getLikes())
                 .active(post.isActive())
                 .createdAt(post.getCreatedAt())
                 .modifiedAt(post.getModifiedAt())

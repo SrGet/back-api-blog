@@ -3,8 +3,11 @@ package com.api.blog.Controllers;
 import com.api.blog.DTOs.EditPostDTO;
 import com.api.blog.DTOs.NewPostDto;
 import com.api.blog.DTOs.PostResponseDTO;
+import com.api.blog.Service.LikeService;
 import com.api.blog.Service.PostService;
 import lombok.RequiredArgsConstructor;
+import org.apache.http.protocol.HTTP;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +21,7 @@ import java.util.List;
 public class PostController {
 
     private final PostService postService;
+    private final LikeService likeService;
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('user')")
@@ -59,6 +63,11 @@ public class PostController {
     @PatchMapping("/update")
     public ResponseEntity<PostResponseDTO> update(@RequestBody EditPostDTO editPostDTO){
         return ResponseEntity.ok(postService.update(editPostDTO));
+    }
+
+    @PatchMapping("/like")
+    public ResponseEntity<String> likePost(@RequestParam Long postId){
+        return ResponseEntity.ok(likeService.likePost(postId));
     }
 
 

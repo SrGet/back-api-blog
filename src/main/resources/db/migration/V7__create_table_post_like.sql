@@ -1,0 +1,14 @@
+CREATE TABLE IF NOT EXISTS post_like (
+
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+
+    user_id BIGINT NOT NULL,
+
+    post_id BIGINT NOT NULL,
+
+    liked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+
+
+
+)

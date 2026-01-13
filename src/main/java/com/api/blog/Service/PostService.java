@@ -40,7 +40,6 @@ public class PostService {
                     .message(newPost.getMessage())
                     .imageUrl(keyFile)
                     .user(user)
-                    .likes(0L)
                     .active(true)
                     .build();
 
@@ -116,5 +115,6 @@ public class PostService {
         return postRepository.findAll(pageable).getContent();
 
     }
+
 
 }
