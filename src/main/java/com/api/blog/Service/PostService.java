@@ -84,7 +84,11 @@ public class PostService {
         }
 
         postRepository.deleteById(postId);
-        minIOService.deleteFile(post.getImageUrl());
+
+        if(post.getImageUrl() != null){
+            minIOService.deleteFile(post.getImageUrl());
+        }
+
         return "Post deleted successfully";
 
     }
