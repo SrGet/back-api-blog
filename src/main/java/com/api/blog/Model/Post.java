@@ -8,6 +8,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
@@ -29,7 +31,8 @@ public class Post {
     @Column(name = "image_url")
     private String imageUrl;
 
-    private Long likes;
+    @OneToMany(mappedBy = "post")
+    private List<PostLike> likes = new ArrayList<>();
 
     @Column(nullable = false)
     private boolean active;
@@ -38,6 +41,7 @@ public class Post {
     @JoinColumn(name = "user_id")
     private User user;
 
+
     @CreatedDate
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -45,4 +49,5 @@ public class Post {
     @LastModifiedDate
     @Column(name = "modified_at")
     private LocalDateTime modifiedAt;
+
 }

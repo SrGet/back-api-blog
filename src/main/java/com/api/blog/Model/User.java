@@ -8,6 +8,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -31,13 +32,12 @@ public class User {
 
     private String username;
 
-
     private String email;
 
     private int age;
 
-    @Column(name = "posts_liked")
-    private List<Long> postsLiked;
+    @OneToMany(mappedBy = "user")
+    private List<PostLike> likes = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Post> posts;
