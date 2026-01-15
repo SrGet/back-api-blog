@@ -7,6 +7,7 @@ import com.api.blog.Repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,33 +16,32 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final KeycloakService keycloakService;
+    //private final KeycloakService keycloakService;
     private final UserRepository userRepository;
 
 
-    public User create(UserDto userDto){
+
+    public User create(User user){
+
+
+        /*
 
 
         String userId = keycloakService.create(userDto);
-
-        if(userId == null){
+          if(userId == null){
             throw new IllegalStateException("Could not create user on Keycloak");
         }
 
-        try {
-            User user = User.builder()
+         */
 
-                    .username(userDto.getUsername())
-                    .name(userDto.getName())
-                    .lastname(userDto.getLastName())
-                    .age(userDto.getAge())
-                    .email(userDto.getEmail())
-                    .active(true)
-                    .build();
+
+        try {
+
 
             return userRepository.save(user);
+
         } catch (Exception e) {
-            keycloakService.delete(userId);
+            //keycloakService.delete(userId);
             throw new RuntimeException("Error creating new user");
         }
 

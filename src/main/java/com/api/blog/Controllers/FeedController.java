@@ -21,7 +21,6 @@ public class FeedController {
     private final FeedService feedService;
 
     @GetMapping("/get")
-    @PreAuthorize("hasRole('user')")
     public ResponseEntity<List<PostResponseDTO>> get(@RequestParam int pageNo,
                                                     @RequestParam int pageSize){
 
