@@ -13,13 +13,13 @@ import java.util.List;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "posts", uniqueConstraints = {@UniqueConstraint(columnNames = {"user"})})
+@Table(name = "posts")
 @Builder
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Where(clause = "active = true")
+
 public class Post {
 
     @Id
