@@ -15,24 +15,6 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
 
-  keycloak:
-    image: quay.io/keycloak/keycloak:26.3.0
-    environment:
-      KC_BOOTSTRAP_ADMIN_USERNAME: admin
-      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
-
-    command:
-      - start-dev
-      - --http-port=9090
-      - --hostname=http://keycloak:9090
-      - --hostname-admin=http://localhost:9090
-    ports:
-      - '9090:9090'
-    networks:
-      - blog-network
-    volumes:
-      - keycloak_data:/opt/keycloak/data
-
   api:
     build:
       context: .
@@ -41,7 +23,6 @@ services:
       - '8080:8080'
     depends_on:
       - mysql
-      - keycloak
       - minio
     networks:
       - blog-network
@@ -49,8 +30,6 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/apiblog
       SPRING_DATASOURCE_USERNAME: domino123
       SPRING_DATASOURCE_PASSWORD: domino123
-      SPRING_JWT_ISSUER: http://keycloak:9090/realms/apiBlog-dev
-      SPRING_JWK: http://keycloak:9090/realms/apiBlog-dev/protocol/openid-connect/certs
       SPRING_REDIS_HOST: redis
       SPRING_REDIS_PORT: 6379
       MINIO_ENDPOINT: http://minio:9000
@@ -85,7 +64,6 @@ networks:
     driver: bridge
 
 volumes:
-  keycloak_data:
   mysql_data:
   redis_data:
   minio_data:

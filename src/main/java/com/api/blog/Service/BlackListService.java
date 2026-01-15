@@ -1,5 +1,6 @@
 package com.api.blog.Service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -13,11 +14,14 @@ import java.util.concurrent.TimeUnit;
 public class BlackListService {
 
     private final RedisTemplate<String, String> redisTemplate;
+    private final JwtService jwtService;
 
-    public void addToBlackList(Jwt jwt){
+    public void addToBlackList(HttpServletRequest request){
+        String token = jwtService.getTokenFromRequest(request);
 
-        String jti = jwt.getId();
-        long ttl = jwt.getExpiresAt().getEpochSecond() - Instant.now().getEpochSecond();
+        String jti = jwtService.getJti(token);
+
+        long ttl = jwtService.getExpiration(token).toInstant().getEpochSecond() - Instant.now().getEpochSecond();
 
         if(ttl > 0){
             redisTemplate.opsForValue().set(jti, "Blacklisted", ttl, TimeUnit.SECONDS);

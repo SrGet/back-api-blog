@@ -26,7 +26,6 @@ public class PostController {
     private final LikeService likeService;
 
     @PostMapping("/create")
-    @PreAuthorize("hasRole('user')")
     public ResponseEntity<PostResponseDTO> create (@ModelAttribute NewPostDto newPostDto){
 
         PostResponseDTO post = postService.create(newPostDto);
@@ -42,7 +41,6 @@ public class PostController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('user')")
     public ResponseEntity<PostResponseDTO> getPost (@PathVariable("id") Long postId){
 
         return ResponseEntity.ok(postService.getPostDTO(postId));
@@ -56,20 +54,17 @@ public class PostController {
     }
 
     @DeleteMapping("/delete/{postId}")
-    @PreAuthorize("hasRole('user')")
     public ResponseEntity<String> delete (@PathVariable Long postId){
 
         return ResponseEntity.ok( postService.delete(postId));
     }
 
     @PatchMapping("/update")
-    @PreAuthorize("hasRole('user')")
     public ResponseEntity<PostResponseDTO> update(@RequestBody EditPostDTO editPostDTO){
         return ResponseEntity.ok(postService.update(editPostDTO));
     }
 
     @PatchMapping("/like")
-    @PreAuthorize("hasRole('user')")
     public ResponseEntity<LikeResponseDTO> toggleLike(@RequestParam Long postId){
         return ResponseEntity.ok(likeService.toggleLike(postId));
     }
