@@ -20,7 +20,7 @@ public class MinIOService {
 
     public String uploadFile(MultipartFile file) {
 
-        if(file == null) {
+        if(file == null || file.isEmpty()) {
             return null;
         }
 

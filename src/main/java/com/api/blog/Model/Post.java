@@ -19,7 +19,6 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-
 public class Post {
 
     @Id
@@ -32,6 +31,7 @@ public class Post {
     private String imageUrl;
 
     @OneToMany(mappedBy = "post")
+    @Builder.Default
     private List<PostLike> likes = new ArrayList<>();
 
     @Column(nullable = false)
