@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Service
@@ -45,6 +46,11 @@ public class LikeService {
                 .liked(true)
                 .likeAmount(likePostRepository.countByPost(post))
                 .build();
+
+    }
+
+    public boolean isLiked(User user, Post post){
+        return likePostRepository.existsByUserAndPost(user,post);
 
     }
 
