@@ -36,6 +36,17 @@ services:
       MINIO_ACCESS_KEY: admin
       MINIO_SECRET_KEY: admin123
 
+  frontend:
+    build:
+      context: C:\Users\USUARIO\Documents\VscProjects\FrontEndApiBlog\frontApiBlog
+    container_name: blog-frontend
+    ports:
+      - "5173:80"
+    networks:
+      - blog-network
+    depends_on:
+      - api
+
   redis:
     image: redis:7.2.10-alpine
     ports:
