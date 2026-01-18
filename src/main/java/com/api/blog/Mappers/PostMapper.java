@@ -14,11 +14,10 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class PostMapper {
 
-    private final LikeService likeService;
-    private final UserService userService;
 
-    public PostResponseDTO toResponseDto(Post post){
-        User authUser = userService.getUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+
+    public PostResponseDTO toResponseDto(Post post,boolean isLikedByCurrentUser ){
+
 
         if (post == null){
             return null;
@@ -30,11 +29,14 @@ public class PostMapper {
                 .imgUrl(post.getImageUrl())
                 .user("@"+post.getUser().getUsername())
                 .likes((long) post.getLikes().size())
-                .likedByCurrentUser(likeService.isLiked(authUser,post))
+                .likedByCurrentUser(isLikedByCurrentUser)
                 .createdAt(post.getCreatedAt())
                 .modifiedAt(post.getModifiedAt())
                 .build();
     }
+
+
+
 
 
 }

@@ -47,11 +47,6 @@ public class PostController {
 
     }
 
-    @GetMapping("/myPosts")
-    public ResponseEntity<List<PostResponseDTO>> myPosts(){
-        return ResponseEntity.ok(postService.getUserPosts());
-
-    }
 
     @DeleteMapping("/delete/{postId}")
     public ResponseEntity<String> delete (@PathVariable Long postId){

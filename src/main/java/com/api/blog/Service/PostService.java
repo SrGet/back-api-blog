@@ -25,6 +25,7 @@ public class PostService {
     private final UserService userService;
     private final PostRepository postRepository;
     private final PostMapper postMapper;
+    private final LikeService likeService;
 
     // Create Post
     @Transactional
@@ -40,12 +41,11 @@ public class PostService {
                     .message(newPost.getMessage())
                     .imageUrl(keyFile)
                     .user(user)
-                    .active(true)
                     .build();
 
-            postRepository.save(post);
+           Post postCreated = postRepository.save(post);
 
-            return postMapper.toResponseDto(post);
+            return getPostDTO(postCreated.getId());
 
         } catch (Exception e) {
 
@@ -58,8 +58,10 @@ public class PostService {
 
     // Get single postDTO by ID
     public PostResponseDTO getPostDTO(Long idPost){
-        return postMapper.toResponseDto(postRepository.findById(idPost).orElseThrow(()
-                -> new NoSuchElementException("Couldn't find post with id: " + idPost)));
+        User user = userService.getUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+        Post post = postRepository.findById(idPost).orElseThrow(() -> new NoSuchElementException("Couldn't find post with id: " + idPost));
+        boolean isLiked = likeService.isLiked(user,post);
+        return postMapper.toResponseDto(post,isLiked);
     }
 
     // Get single PostEntity by ID
@@ -68,11 +70,6 @@ public class PostService {
                 -> new NoSuchElementException("Couldn't find post with id: " + idPost));
     }
 
-    // Get user posts
-    public List<PostResponseDTO> getUserPosts(){
-        List<Post> posts = userService.myPosts();
-        return posts.stream().map(postMapper::toResponseDto).toList();
-    }
 
      // Delete user post
     public String delete (Long postId){
@@ -95,18 +92,19 @@ public class PostService {
 
     // Update Post
     public PostResponseDTO update(EditPostDTO editPostDTO){
+        User user = userService.getUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
 
         Post oldPost = getPostEntity(editPostDTO.getPostId());
 
-        if(!oldPost.getUser().getUsername().equals(SecurityContextHolder.getContext().getAuthentication().getName())){
+        if(!oldPost.getUser().getUsername().equals(user.getUsername())){
             throw new AccessDeniedException("You are not allowed to delete this post.");
         }
 
         if(!editPostDTO.getNewMessage().isBlank()){
             oldPost.setMessage(editPostDTO.getNewMessage());
         }
-        postRepository.save(oldPost);
-        return postMapper.toResponseDto(oldPost);
+        Post editedPost = postRepository.save(oldPost);
+        return getPostDTO(editedPost.getId());
 
     }
 
@@ -116,6 +114,5 @@ public class PostService {
         return postRepository.findAll(pageable).getContent();
 
     }
-
 
 }
