@@ -16,35 +16,18 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
 
-    //private final KeycloakService keycloakService;
     private final UserRepository userRepository;
-
-
 
     public User create(User user){
 
-
-        /*
-
-
-        String userId = keycloakService.create(userDto);
-          if(userId == null){
-            throw new IllegalStateException("Could not create user on Keycloak");
-        }
-
-         */
-
-
         try {
-
 
             return userRepository.save(user);
 
         } catch (Exception e) {
-            //keycloakService.delete(userId);
+
             throw new RuntimeException("Error creating new user");
         }
-
 
     }
 
@@ -52,9 +35,4 @@ public class UserService {
         return userRepository.findByUsername(username);
     }
 
-    public List<Post> myPosts(){
-        User user = getUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
-        return user.getPosts();
-
-    }
 }

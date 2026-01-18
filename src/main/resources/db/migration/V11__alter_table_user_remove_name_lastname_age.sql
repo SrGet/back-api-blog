@@ -1,0 +1,4 @@
+ALTER TABLE users
+DROP COLUMN name,
+DROP COLUMN lastname,
+DROP COLUMN age;

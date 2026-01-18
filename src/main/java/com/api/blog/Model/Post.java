@@ -34,8 +34,6 @@ public class Post {
     @Builder.Default
     private List<PostLike> likes = new ArrayList<>();
 
-    @Column(nullable = false)
-    private boolean active;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")

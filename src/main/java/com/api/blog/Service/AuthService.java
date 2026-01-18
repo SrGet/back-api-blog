@@ -25,10 +25,7 @@ public class AuthService {
 
     public JwtResponse login(LoginRequestDTO loginRequest){
 
-        System.out.println("Dentro de metodo Login");
-
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),loginRequest.getPassword()));
-
 
         UserDetails user = userService.getUserByUsername(loginRequest.getUsername());
 
@@ -39,25 +36,17 @@ public class AuthService {
     }
 
 
-
     public void register(UserDto registerRequest){
 
-
-
         User user = User.builder()
-
                 .username(registerRequest.getUsername())
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
-                .name(registerRequest.getName())
-                .lastname(registerRequest.getLastName())
-                .age(registerRequest.getAge())
                 .email(registerRequest.getEmail())
                 .role(Roles.USER)
                 .active(true)
                 .build();
 
         userService.create(user);
-
 
     }
 
