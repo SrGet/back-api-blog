@@ -59,8 +59,8 @@ public class PostController {
         return ResponseEntity.ok(postService.update(editPostDTO));
     }
 
-    @PatchMapping("/like")
-    public ResponseEntity<LikeResponseDTO> toggleLike(@RequestParam Long postId){
+    @PatchMapping("/like/{postId}")
+    public ResponseEntity<LikeResponseDTO> toggleLike(@PathVariable Long postId){
         return ResponseEntity.ok(likeService.toggleLike(postId));
     }
 
