@@ -30,17 +30,11 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-
-    private String lastname;
-
     private String username;
 
     private String password;
 
     private String email;
-
-    private int age;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -59,8 +53,6 @@ public class User implements UserDetails {
     @LastModifiedDate
     @Column(name = "modified_at")
     private LocalDateTime modifiedAt;
-
-
 
     @Column(nullable = false)
     private boolean active;

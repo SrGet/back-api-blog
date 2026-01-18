@@ -5,12 +5,14 @@ import com.api.blog.Model.Post;
 import com.api.blog.Model.PostLike;
 import com.api.blog.Model.User;
 import com.api.blog.Repositories.LikePostRepository;
+import com.api.blog.Repositories.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 
 @Service
@@ -18,13 +20,13 @@ import java.util.List;
 public class LikeService {
 
     private final LikePostRepository likePostRepository;
-    private final PostService postService;
+    private final PostRepository postRepository;
     private final UserService userService;
 
     @Transactional
     public LikeResponseDTO toggleLike(Long idPost){
 
-        Post post = postService.getPostEntity(idPost);
+        Post post = postRepository.findById(idPost).orElseThrow(() -> new NoSuchElementException("Post no found"));
         User user = userService.getUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
 
         if(likePostRepository.existsByUserAndPost(user,post)){
@@ -53,9 +55,5 @@ public class LikeService {
         return likePostRepository.existsByUserAndPost(user,post);
 
     }
-
-
-
-
 
 }

@@ -9,12 +9,10 @@ import lombok.Value;
 @Setter
 public class UserDto {
 
-    String name;
-    String lastName;
     String username;
     String password;
     String email;
-    int age;
+
 
 
 }
