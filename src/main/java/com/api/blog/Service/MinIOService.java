@@ -2,6 +2,7 @@ package com.api.blog.Service;
 
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
@@ -13,6 +14,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MinIOService {
 
     private final S3Client s3Client;
@@ -34,7 +36,9 @@ public class MinIOService {
 
         try {
             s3Client.putObject(putObjectRequest, software.amazon.awssdk.core.sync.RequestBody.fromBytes(file.getBytes()));
+            log.info("File uploading successful");
         } catch (IOException e) {
+            log.error("File uploading failed. Reason: {}",e.getMessage());
             throw new RuntimeException(e.getMessage());
         }
         return key;
@@ -48,7 +52,9 @@ public class MinIOService {
                     .build();
 
             s3Client.deleteObject(deleteObjectRequest);
+            log.info("File deleting successful");
         } catch (AwsServiceException e) {
+            log.error("File deleting failed. Reason: {}",e.getMessage());
             throw new RuntimeException(e.getMessage());
         }
 

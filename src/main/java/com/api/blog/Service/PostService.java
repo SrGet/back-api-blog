@@ -9,6 +9,7 @@ import com.api.blog.Model.User;
 import com.api.blog.Repositories.PostRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PostService {
@@ -44,11 +46,12 @@ public class PostService {
                     .build();
 
            Post postCreated = postRepository.save(post);
-
+            log.info("Post creation successful. Returning DTO");
             return getPostDTO(postCreated.getId());
 
         } catch (Exception e) {
 
+            log.error("Post creation failed, deleting file. Reason: {}",e.getMessage());
             minIOService.deleteFile(keyFile);
 
             throw new RuntimeException("Error creating post: " + e.getMessage());
@@ -110,7 +113,6 @@ public class PostService {
 
     // Get LastsPosts
     public List<Post> getLastsPosts(Pageable pageable){
-
         return postRepository.findAll(pageable).getContent();
 
     }
