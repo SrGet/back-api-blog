@@ -6,6 +6,7 @@ import com.api.blog.DTOs.UserDto;
 import com.api.blog.Model.Roles;
 import com.api.blog.Model.User;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final AuthenticationManager authenticationManager;
@@ -22,14 +24,24 @@ public class AuthService {
     private final JwtService jwtService;
 
 
-
     public JwtResponse login(LoginRequestDTO loginRequest){
 
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),loginRequest.getPassword()));
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),loginRequest.getPassword()));
+            log.info("Authentication successful for user {}", loginRequest.getUsername());
+
+        } catch (Exception e) {
+
+            log.info("Login failed for user {}. Reason: {}",loginRequest.getUsername(),e.getMessage());
+            throw new RuntimeException(e);
+        }
 
         UserDetails user = userService.getUserByUsername(loginRequest.getUsername());
 
         String jwt = jwtService.getToken(user);
+
+        log.info("Login successful for user {}. Generating JWT", loginRequest.getUsername());
         return JwtResponse.builder()
                 .jwt(jwt)
                 .build();
