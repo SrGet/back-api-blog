@@ -26,7 +26,7 @@ public class PostMapper {
         return PostResponseDTO.builder()
                 .id(post.getId())
                 .message(post.getMessage())
-                .imgUrl(post.getImageUrl())
+                .imgUrl(post.getImageUrl() != null ? "/file/"+post.getImageUrl() : null)
                 .user("@"+post.getUser().getUsername())
                 .likes((long) post.getLikes().size())
                 .likedByCurrentUser(isLikedByCurrentUser)

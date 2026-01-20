@@ -37,6 +37,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/file/**").permitAll()
                         .requestMatchers("/api/user/**").hasAuthority("USER")
                         .requestMatchers("/api/post/**").hasAuthority("USER")
                         .requestMatchers("/api/feed/**").hasAuthority("USER")
