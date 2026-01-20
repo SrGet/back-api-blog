@@ -27,12 +27,6 @@ public class FeedService {
 
         return posts.stream().map(post -> postService.getPostDTO(post.getId())).toList();
 
-
-
-
-
-
-
     }
 
 
