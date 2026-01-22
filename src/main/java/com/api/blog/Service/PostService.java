@@ -65,11 +65,11 @@ public class PostService {
         User user = userService.getUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
         Post post = postRepository.findById(idPost).orElseThrow(() -> new NoSuchElementException("Couldn't find post with id: " + idPost));
 
-        boolean isOwner = user.getUsername().equals(post.getUser().getUsername());
+        boolean owner = user.getUsername().equals(post.getUser().getUsername());
 
         boolean isLiked = likeService.isLiked(user,post);
 
-        return postMapper.toResponseDto(post,isLiked, isOwner);
+        return postMapper.toResponseDto(post,isLiked, owner);
     }
 
     // Get single PostEntity by ID
