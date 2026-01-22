@@ -16,6 +16,7 @@ public class PostResponseDTO {
     private String user;
     private String imgUrl;
     private boolean likedByCurrentUser;
+    private boolean owner;
     private Long likes;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
