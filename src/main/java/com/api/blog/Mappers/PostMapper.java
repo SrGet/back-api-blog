@@ -16,7 +16,7 @@ public class PostMapper {
 
 
 
-    public PostResponseDTO toResponseDto(Post post,boolean isLikedByCurrentUser ){
+    public PostResponseDTO toResponseDto(Post post,boolean isLikedByCurrentUser, boolean isOwner ){
 
 
         if (post == null){
@@ -26,10 +26,11 @@ public class PostMapper {
         return PostResponseDTO.builder()
                 .id(post.getId())
                 .message(post.getMessage())
-                .imgUrl(post.getImageUrl())
+                .imgUrl(post.getImageUrl() != null ? "/file/"+post.getImageUrl() : null)
                 .user("@"+post.getUser().getUsername())
                 .likes((long) post.getLikes().size())
                 .likedByCurrentUser(isLikedByCurrentUser)
+                .isOwner(isOwner)
                 .createdAt(post.getCreatedAt())
                 .modifiedAt(post.getModifiedAt())
                 .build();

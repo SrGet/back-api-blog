@@ -10,6 +10,7 @@ import com.api.blog.Repositories.PostRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -63,8 +64,12 @@ public class PostService {
     public PostResponseDTO getPostDTO(Long idPost){
         User user = userService.getUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
         Post post = postRepository.findById(idPost).orElseThrow(() -> new NoSuchElementException("Couldn't find post with id: " + idPost));
+
+        boolean isOwner = user.getUsername().equals(post.getUser().getUsername());
+
         boolean isLiked = likeService.isLiked(user,post);
-        return postMapper.toResponseDto(post,isLiked);
+
+        return postMapper.toResponseDto(post,isLiked, isOwner);
     }
 
     // Get single PostEntity by ID
@@ -112,8 +117,8 @@ public class PostService {
     }
 
     // Get LastsPosts
-    public List<Post> getLastsPosts(Pageable pageable){
-        return postRepository.findAll(pageable).getContent();
+    public Page<Post> getLastsPosts(Pageable pageable){
+        return postRepository.findAll(pageable);
 
     }
 

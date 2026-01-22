@@ -8,8 +8,10 @@ import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.UUID;
 
 @Service
@@ -58,6 +60,16 @@ public class MinIOService {
             throw new RuntimeException(e.getMessage());
         }
 
+    }
+
+    public InputStream getImg(String key){
+
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .build();
+        log.info("Returning object for key: {}",key);
+        return s3Client.getObject(getObjectRequest);
     }
 
 }
