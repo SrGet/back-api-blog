@@ -16,7 +16,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.time.LocalDateTime;
+
 import java.util.NoSuchElementException;
 
 @Slf4j
@@ -43,6 +44,7 @@ public class PostService {
             Post post = Post.builder()
                     .message(newPost.getMessage())
                     .imageUrl(keyFile)
+                    .deleted_at(null)
                     .user(user)
                     .build();
 
@@ -62,14 +64,14 @@ public class PostService {
 
     // Get single postDTO by ID
     public PostResponseDTO getPostDTO(Long idPost){
+
         User user = userService.getUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
         Post post = postRepository.findById(idPost).orElseThrow(() -> new NoSuchElementException("Couldn't find post with id: " + idPost));
 
-        boolean isOwner = user.getUsername().equals(post.getUser().getUsername());
-
+        boolean owner = user.getUsername().equals(post.getUser().getUsername());
         boolean isLiked = likeService.isLiked(user,post);
 
-        return postMapper.toResponseDto(post,isLiked, isOwner);
+        return postMapper.toResponseDto(post,isLiked, owner);
     }
 
     // Get single PostEntity by ID
@@ -80,7 +82,7 @@ public class PostService {
 
 
      // Delete user post
-    public String delete (Long postId){
+    public void delete (Long postId){
 
         Post post = getPostEntity(postId);
 
@@ -88,13 +90,18 @@ public class PostService {
             throw new AccessDeniedException("You are not allowed to delete this post.");
         }
 
-        postRepository.deleteById(postId);
+        if(post.getDeleted_at() != null){
+            throw new IllegalArgumentException("Post: " + postId + " is already deleted.");
+        }
+
+        post.setDeleted_at(LocalDateTime.now());
 
         if(post.getImageUrl() != null){
             minIOService.deleteFile(post.getImageUrl());
+            post.setImageUrl(null);
         }
-
-        return "Post deleted successfully";
+        postRepository.save(post);
+        log.info("Soft-deleting successful for post: {} ", postId);
 
     }
 

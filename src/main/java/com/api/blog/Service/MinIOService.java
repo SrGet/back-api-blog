@@ -47,6 +47,7 @@ public class MinIOService {
     }
 
     public void deleteFile(String keyFile){
+
         try {
             DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
                     .bucket(bucketName)
