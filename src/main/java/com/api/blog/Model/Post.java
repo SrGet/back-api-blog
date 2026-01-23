@@ -2,6 +2,7 @@ package com.api.blog.Model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.Where;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -19,6 +20,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@SQLRestriction("deleted_at IS NULL")
 public class Post {
 
     @Id
@@ -33,6 +35,9 @@ public class Post {
     @OneToMany(mappedBy = "post")
     @Builder.Default
     private List<PostLike> likes = new ArrayList<>();
+
+
+    private LocalDateTime deleted_at;
 
 
     @ManyToOne(fetch = FetchType.LAZY)
