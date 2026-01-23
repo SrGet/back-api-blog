@@ -16,7 +16,7 @@ public class PostMapper {
 
 
 
-    public PostResponseDTO toResponseDto(Post post,boolean isLikedByCurrentUser, boolean isOwner ){
+    public PostResponseDTO toResponseDto(Post post,boolean isLikedByCurrentUser, boolean owner ){
 
 
         if (post == null){
@@ -30,7 +30,8 @@ public class PostMapper {
                 .user("@"+post.getUser().getUsername())
                 .likes((long) post.getLikes().size())
                 .likedByCurrentUser(isLikedByCurrentUser)
-                .isOwner(isOwner)
+                .owner(owner)
+                .deleted_at(post.getDeleted_at())
                 .createdAt(post.getCreatedAt())
                 .modifiedAt(post.getModifiedAt())
                 .build();

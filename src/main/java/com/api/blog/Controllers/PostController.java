@@ -49,9 +49,9 @@ public class PostController {
 
 
     @DeleteMapping("/delete/{postId}")
-    public ResponseEntity<String> delete (@PathVariable Long postId){
-
-        return ResponseEntity.ok( postService.delete(postId));
+    public ResponseEntity<Void> delete (@PathVariable Long postId){
+        postService.delete(postId);
+        return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/update")
