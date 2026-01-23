@@ -7,6 +7,7 @@ import com.api.blog.Model.User;
 import com.api.blog.Repositories.LikePostRepository;
 import com.api.blog.Repositories.PostRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class LikeService {
 
     private final LikePostRepository likePostRepository;
@@ -52,6 +54,7 @@ public class LikeService {
     }
 
     public boolean isLiked(User user, Post post){
+        log.info("Counting likes for User: {} and Post: {}",user.getUsername(),post.getId());
         return likePostRepository.existsByUserAndPost(user,post);
 
     }

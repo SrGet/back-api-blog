@@ -31,6 +31,7 @@ public class PostMapper {
                 .likes((long) post.getLikes().size())
                 .likedByCurrentUser(isLikedByCurrentUser)
                 .owner(owner)
+                .deleted_at(post.getDeleted_at())
                 .createdAt(post.getCreatedAt())
                 .modifiedAt(post.getModifiedAt())
                 .build();
