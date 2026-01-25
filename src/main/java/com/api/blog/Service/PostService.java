@@ -7,6 +7,7 @@ import com.api.blog.Mappers.PostMapper;
 import com.api.blog.Model.Post;
 import com.api.blog.Model.User;
 import com.api.blog.Repositories.PostRepository;
+import com.api.blog.Repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,16 +27,16 @@ import java.util.NoSuchElementException;
 public class PostService {
 
     private final MinIOService minIOService;
-    private final UserService userService;
+    private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final PostMapper postMapper;
     private final LikeService likeService;
 
     // Create Post
     @Transactional
-    public PostResponseDTO create(NewPostDto newPost){
+    public PostResponseDTO create(NewPostDto newPost, String username){
 
-        User user = userService.getUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+        User user = userRepository.findByUsername(username);
 
         String keyFile = minIOService.uploadFile(newPost.getFile());
 
@@ -50,7 +51,7 @@ public class PostService {
 
            Post postCreated = postRepository.save(post);
             log.info("Post creation successful. Returning DTO");
-            return getPostDTO(postCreated.getId());
+            return getPostDTO(postCreated.getId(), username);
 
         } catch (Exception e) {
 
@@ -63,15 +64,15 @@ public class PostService {
     }
 
     // Get single postDTO by ID
-    public PostResponseDTO getPostDTO(Long idPost){
+    public PostResponseDTO getPostDTO(Long idPost, String currentUsername){
 
-        User user = userService.getUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+        User user = userRepository.findByUsername(currentUsername);
         Post post = postRepository.findById(idPost).orElseThrow(() -> new NoSuchElementException("Couldn't find post with id: " + idPost));
 
         boolean owner = user.getUsername().equals(post.getUser().getUsername());
         boolean isLiked = likeService.isLiked(user,post);
 
-        return postMapper.toResponseDto(post,isLiked, owner);
+        return postMapper.toResponseDto(post,isLiked, owner, user.getProfileImgKey());
     }
 
     // Get single PostEntity by ID
@@ -106,8 +107,8 @@ public class PostService {
     }
 
     // Update Post
-    public PostResponseDTO update(EditPostDTO editPostDTO){
-        User user = userService.getUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+    public PostResponseDTO update(EditPostDTO editPostDTO, String currentUsername){
+        User user = userRepository.findByUsername(currentUsername);
 
         Post oldPost = getPostEntity(editPostDTO.getPostId());
 
@@ -119,13 +120,19 @@ public class PostService {
             oldPost.setMessage(editPostDTO.getNewMessage());
         }
         Post editedPost = postRepository.save(oldPost);
-        return getPostDTO(editedPost.getId());
+        return getPostDTO(editedPost.getId(), currentUsername);
 
     }
 
     // Get LastsPosts
     public Page<Post> getLastsPosts(Pageable pageable){
         return postRepository.findAll(pageable);
+
+    }
+
+    public Page<Post> getUserPosts(Pageable pageable, String username){
+        User user = userRepository.findByUsername(username);
+        return postRepository.findAllByUserId(pageable, user.getId());
 
     }
 

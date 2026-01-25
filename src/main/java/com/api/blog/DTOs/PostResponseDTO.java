@@ -14,7 +14,8 @@ public class PostResponseDTO {
     private Long id;
     private String message;
     private String user;
-    private String imgUrl;
+    private String imgPostUrl;
+    private String imgUserUrl;
     private boolean likedByCurrentUser;
     private boolean owner;
     private LocalDateTime deleted_at;

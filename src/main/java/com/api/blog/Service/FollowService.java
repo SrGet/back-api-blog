@@ -21,11 +21,10 @@ public class FollowService {
     private final UserRepository userRepository;
 
     @Transactional
-    public FollowResponseDTO toggleFollow(String follower, Long followTarget ){
+    public FollowResponseDTO toggleFollow(String follower, String followTarget ){
 
         User currentUser = userRepository.findByUsername(follower);
-        User followedUser = userRepository.findById(followTarget).orElseThrow(
-                () -> new NoSuchElementException("User not found for id: "+ followTarget ));
+        User followedUser = userRepository.findByUsername(followTarget);
 
         if(currentUser.getId().equals(followedUser.getId())){
             throw  new IllegalArgumentException("Cannot follow yourself :/");
@@ -39,7 +38,6 @@ public class FollowService {
             return FollowResponseDTO.builder()
                     .followed(false)
                     .build();
-
         }
 
         Follows followerFollowed = Follows.builder()
@@ -48,12 +46,30 @@ public class FollowService {
                 .build();
 
         followRepository.save(followerFollowed);
+
         log.info("Creating follow successful, follower: {}, followed: {}", currentUser.getUsername(), followedUser.getUsername());
+        Long followersCount = followRepository.countByFollowed(followedUser);
 
         return FollowResponseDTO.builder()
                 .followed(true)
+                .followersCount(followersCount)
                 .build();
 
     }
+
+
+    public Long getFollowingCount(User follower){
+        return followRepository.countByFollower(follower);
+    }
+
+    public Long getFollowersCount(User follower){
+        return followRepository.countByFollowed(follower);
+    }
+
+    public boolean isFollowed(User currentUser, User targetUser){
+        return followRepository.existsByFollowerAndFollowed(currentUser,targetUser);
+    }
+
+
 
 }

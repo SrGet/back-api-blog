@@ -14,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
@@ -26,9 +27,9 @@ public class PostController {
     private final LikeService likeService;
 
     @PostMapping("/create")
-    public ResponseEntity<PostResponseDTO> create (@ModelAttribute NewPostDto newPostDto){
+    public ResponseEntity<PostResponseDTO> create (@ModelAttribute NewPostDto newPostDto, Principal principal){
 
-        PostResponseDTO post = postService.create(newPostDto);
+        PostResponseDTO post = postService.create(newPostDto, principal.getName());
 
         URI location =  ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -40,12 +41,13 @@ public class PostController {
 
     }
 
+    /*
     @GetMapping("/{id}")
     public ResponseEntity<PostResponseDTO> getPost (@PathVariable("id") Long postId){
-
         return ResponseEntity.ok(postService.getPostDTO(postId));
-
     }
+    */
+
 
 
     @DeleteMapping("/delete/{postId}")
@@ -55,13 +57,13 @@ public class PostController {
     }
 
     @PatchMapping("/update")
-    public ResponseEntity<PostResponseDTO> update(@RequestBody EditPostDTO editPostDTO){
-        return ResponseEntity.ok(postService.update(editPostDTO));
+    public ResponseEntity<PostResponseDTO> update(@RequestBody EditPostDTO editPostDTO, Principal principal){
+        return ResponseEntity.ok(postService.update(editPostDTO, principal.getName()));
     }
 
     @PatchMapping("/like/{postId}")
-    public ResponseEntity<LikeResponseDTO> toggleLike(@PathVariable Long postId){
-        return ResponseEntity.ok(likeService.toggleLike(postId));
+    public ResponseEntity<LikeResponseDTO> toggleLike(@PathVariable Long postId, Principal principal){
+        return ResponseEntity.ok(likeService.toggleLike(postId, principal.getName()));
     }
 
 

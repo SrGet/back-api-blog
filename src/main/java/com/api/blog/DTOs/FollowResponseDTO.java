@@ -10,4 +10,5 @@ import lombok.Setter;
 public class FollowResponseDTO {
 
     private boolean followed;
+    private Long followersCount;
 }
