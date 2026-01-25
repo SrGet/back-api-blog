@@ -56,6 +56,7 @@ public class AuthService {
                 .email(registerRequest.getEmail())
                 .role(Roles.USER)
                 .active(true)
+                .profileImgKey(registerRequest.getProfileImgUrl())
                 .build();
 
         userService.create(user);

@@ -21,14 +21,26 @@ public class FeedService {
     private final PostService postService;
 
 
-    public Page<PostResponseDTO> getUserFeed(int pageNo, int pageSize){
+    public Page<PostResponseDTO> getUserFeed(int pageNo, int pageSize, String currentUsername){
 
         Page<Post> posts = postService.getLastsPosts(PageRequest.of(pageNo-1,pageSize));
 
         log.info("Getting lastPosts successful with pageNo: {}, pageSize: {}, Returning DTOs",pageNo-1,pageSize);
 
-        return posts.map(post -> postService.getPostDTO(post.getId()));
+        return posts.map(post -> postService.getPostDTO(post.getId(), currentUsername));
 
     }
+
+    public Page<PostResponseDTO> getUserFeed(int pageNo, int pageSize, String currentUsername, String targetUsername){
+
+        Page<Post> posts = postService.getUserPosts(PageRequest.of(pageNo-1,pageSize), targetUsername);
+
+        log.info("Getting user posts successful with pageNo: {}, pageSize: {}, Returning DTOs",pageNo-1,pageSize);
+
+        return posts.map(post -> postService.getPostDTO(post.getId(), currentUsername));
+
+    }
+
+
 
 }

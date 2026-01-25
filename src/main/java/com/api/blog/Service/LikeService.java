@@ -6,6 +6,7 @@ import com.api.blog.Model.PostLike;
 import com.api.blog.Model.User;
 import com.api.blog.Repositories.LikePostRepository;
 import com.api.blog.Repositories.PostRepository;
+import com.api.blog.Repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,13 +24,13 @@ public class LikeService {
 
     private final LikePostRepository likePostRepository;
     private final PostRepository postRepository;
-    private final UserService userService;
+    private final UserRepository userRepository;
 
     @Transactional
-    public LikeResponseDTO toggleLike(Long idPost){
+    public LikeResponseDTO toggleLike(Long idPost, String currentUser){
 
-        Post post = postRepository.findById(idPost).orElseThrow(() -> new NoSuchElementException("Post no found"));
-        User user = userService.getUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+        Post post = postRepository.findById(idPost).orElseThrow(() -> new NoSuchElementException("Post no found for id: " + idPost));
+        User user = userRepository.findByUsername(currentUser);
 
         if(likePostRepository.existsByUserAndPost(user,post)){
             likePostRepository.deleteByUserAndPost(user,post);

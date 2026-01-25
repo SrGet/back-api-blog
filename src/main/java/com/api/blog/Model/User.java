@@ -34,6 +34,9 @@ public class User implements UserDetails {
 
     private String email;
 
+    @Column(name = "profile_img_key")
+    private String profileImgKey;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Roles role;
