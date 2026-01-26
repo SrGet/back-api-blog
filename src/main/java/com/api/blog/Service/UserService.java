@@ -50,6 +50,7 @@ public class UserService {
         Long followersAmount = followService.getFollowersCount(user);
 
         boolean followed =  followService.isFollowed(authuser,user);
+        Long postsCount = postService.postsCount(user);
 
         return UserProfileDTO.builder()
 
@@ -57,6 +58,7 @@ public class UserService {
                 .username(user.getUsername())
                 .following(followingAmount)
                 .followers(followersAmount)
+                .postsCount(postsCount)
                 .followed(followed)
                 .build();
 
