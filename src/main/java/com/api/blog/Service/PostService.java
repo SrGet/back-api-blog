@@ -136,4 +136,8 @@ public class PostService {
 
     }
 
+    public Long postsCount(User user){
+        return postRepository.countByUser(user);
+    }
+
 }

@@ -16,6 +16,7 @@ public class UserProfileDTO {
     private String username;
     private Long following;
     private Long followers;
+    private Long postsCount;
     private boolean followed;
 
 }
