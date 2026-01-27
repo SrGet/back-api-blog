@@ -16,6 +16,7 @@ public class CommentMapper {
                 .username(currentUser)
                 .createdAt(comment.getCreatedAt())
                 .message(comment.getMessage())
+                .owner(owner)
                 .imgUrl(comment.getImgUrl() != null ? "/file/" + comment.getImgUrl() : null )
                 .build();
     }

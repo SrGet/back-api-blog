@@ -11,8 +11,11 @@ import com.api.blog.Repositories.PostRepository;
 import com.api.blog.Repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -54,10 +57,23 @@ public class CommentService {
     public CommentResponse getCommentDTO(Comments comment, Long postId, String currentUser){
 
         boolean isOwner = comment.getUser().getUsername().equals(currentUser);
+        log.info("CommentUser: {} --- CurrentUser: {}",comment.getUser().getUsername(), currentUser );
 
 
 
         return commentMapper.toResponseDTO(comment, postId, currentUser,isOwner);
+    }
+
+    public Page<CommentResponse> getPostComments(int pageNo, int pageSize, Long postId, String currentUser){
+        // Post post = postRepository.findById(postId).orElseThrow(() -> new NoSuchElementException("Post not found"));
+
+        Page<Comments> commentsList = commentRepository.findAllByPostId(PageRequest.of(pageNo,pageSize), postId);
+        if(commentsList != null){
+            return commentsList.map(comment -> getCommentDTO(comment, postId, currentUser));
+        }else {
+            return null;
+        }
+
     }
 
 

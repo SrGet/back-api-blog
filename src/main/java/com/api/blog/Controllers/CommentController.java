@@ -4,11 +4,9 @@ import com.api.blog.DTOs.NewCommentRequest;
 import com.api.blog.DTOs.CommentResponse;
 import com.api.blog.Service.CommentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
@@ -33,5 +31,14 @@ public class CommentController {
                 .toUri();
 
         return ResponseEntity.created(location).body(comment);
+    }
+
+    @GetMapping("/get")
+    public ResponseEntity<Page<CommentResponse>> get(@RequestParam int pageNo,
+                                                     @RequestParam int pageSize,
+                                                     @RequestParam Long postId,
+                                                     Principal principal){
+        return ResponseEntity.ok(commentService.getPostComments(pageNo,pageSize,postId, principal.getName()));
+
     }
 }
