@@ -3,7 +3,6 @@ package com.api.blog.Model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLRestriction;
-import org.hibernate.annotations.Where;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -52,5 +51,9 @@ public class Post {
     @LastModifiedDate
     @Column(name = "modified_at")
     private LocalDateTime modifiedAt;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Comments> comments = new ArrayList<>();
 
 }
