@@ -30,6 +30,7 @@ public class PostMapper {
                 .imgUserUrl(imgUserUrl != null ? "/file/"+post.getImageUrl() : null)
                 .user(post.getUser().getUsername())
                 .likes((long) post.getLikes().size())
+                .commentsAmount(post.getComments().size())
                 .likedByCurrentUser(isLikedByCurrentUser)
                 .owner(owner)
                 .deleted_at(post.getDeleted_at())
