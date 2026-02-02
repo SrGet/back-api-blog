@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -24,10 +26,20 @@ public class FeedController {
 
     @GetMapping("/get")
     public ResponseEntity<Page<PostResponseDTO>> get(@RequestParam int pageNo,
-                                                     @RequestParam int pageSize){
+                                                     @RequestParam int pageSize,
+                                                     Principal principal){
 
-        return ResponseEntity.ok(feedService.getUserFeed(pageNo, pageSize));
+        return ResponseEntity.ok(feedService.getUserFeed(pageNo, pageSize, principal.getName()));
 
 
+    }
+
+    @GetMapping("/userPosts")
+    public ResponseEntity<Page<PostResponseDTO>> getUserPosts(@RequestParam int pageNo,
+                                                              @RequestParam int pageSize,
+                                                              @RequestParam String targetUsername,
+                                                              Principal principal){
+
+        return ResponseEntity.ok(feedService.getUserFeed(pageNo,pageSize, principal.getName(), targetUsername));
     }
 }

@@ -10,6 +10,7 @@ import lombok.Value;
 public class UserDto {
 
     String username;
+    String profileImgUrl;
     String password;
     String email;
 
