@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CommentMapper {
 
-    public CommentResponse toResponseDTO (Comments comment, Long postId, String currentUser, boolean owner){
+    public CommentResponse toResponseDTO (Comments comment, Long postId, String username, boolean owner){
         return CommentResponse.builder()
                 .id(comment.getId())
                 .postId(postId)
-                .username(currentUser)
+                .username(username)
                 .createdAt(comment.getCreatedAt())
                 .message(comment.getMessage())
                 .owner(owner)

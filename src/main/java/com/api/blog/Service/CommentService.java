@@ -55,21 +55,19 @@ public class CommentService {
     }
 
     public CommentResponse getCommentDTO(Comments comment, Long postId, String currentUser){
+        String username = comment.getUser().getUsername();
+        boolean isOwner = username.equals(currentUser);
 
-        boolean isOwner = comment.getUser().getUsername().equals(currentUser);
-        log.info("CommentUser: {} --- CurrentUser: {}",comment.getUser().getUsername(), currentUser );
+        log.info("CommentUser: {} --- CurrentUser: {}",username, currentUser );
 
-
-
-        return commentMapper.toResponseDTO(comment, postId, currentUser,isOwner);
+        return commentMapper.toResponseDTO(comment, postId, username,isOwner);
     }
 
-    public Page<CommentResponse> getPostComments(int pageNo, int pageSize, Long postId, String currentUser){
-        // Post post = postRepository.findById(postId).orElseThrow(() -> new NoSuchElementException("Post not found"));
+    public Page<CommentResponse> getPostComments(int pageNo, int pageSize, Long postId, String username){
 
         Page<Comments> commentsList = commentRepository.findAllByPostId(PageRequest.of(pageNo,pageSize), postId);
         if(commentsList != null){
-            return commentsList.map(comment -> getCommentDTO(comment, postId, currentUser));
+            return commentsList.map(comment -> getCommentDTO(comment, postId, username));
         }else {
             return null;
         }
