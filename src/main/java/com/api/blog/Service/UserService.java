@@ -1,20 +1,12 @@
 package com.api.blog.Service;
 
-import com.api.blog.DTOs.PostResponseDTO;
-import com.api.blog.DTOs.UserDto;
+import com.api.blog.ErrorHandling.customExceptions.ResourceNotFoundException;
 import com.api.blog.DTOs.UserProfileDTO;
-import com.api.blog.Mappers.PostMapper;
-import com.api.blog.Model.Post;
 import com.api.blog.Model.User;
 import com.api.blog.Repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -37,14 +29,15 @@ public class UserService {
         }
     }
 
-    public User getUserByUsername(String username){
-        return userRepository.findByUsername(username);
-    }
+
 
     public UserProfileDTO getProfile(String currentUser,String username){
 
-        User authuser = getUserByUsername(currentUser);
-        User user = getUserByUsername(username);
+        User authuser = userRepository.findByUsername(currentUser).orElseThrow(
+                () -> new ResourceNotFoundException("Couldn't find user: " + currentUser));
+
+        User user = userRepository.findByUsername(username).orElseThrow(
+                () -> new ResourceNotFoundException("Couldn't find user: " + username));
 
         Long followingAmount = followService.getFollowingCount(user);
         Long followersAmount = followService.getFollowersCount(user);

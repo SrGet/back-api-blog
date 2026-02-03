@@ -1,5 +1,6 @@
 package com.api.blog.Service;
 
+import com.api.blog.ErrorHandling.customExceptions.ResourceNotFoundException;
 import com.api.blog.DTOs.NewCommentRequest;
 import com.api.blog.DTOs.CommentResponse;
 import com.api.blog.Mappers.CommentMapper;
@@ -15,7 +16,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -34,7 +34,9 @@ public class CommentService {
 
         Post post = postRepository.findById(newComment.getPostId()).orElseThrow(() -> new NoSuchElementException("Post not found."));
 
-        User currentUser = userRepository.findByUsername(currentUsername);
+        User currentUser = userRepository.findByUsername(currentUsername).orElseThrow(
+                () -> new ResourceNotFoundException("Couldn't find user: " + currentUsername));
+
         String imgKey = minIOService.uploadFile(newComment.getFile());
 
         Comments comment = Comments.builder()
