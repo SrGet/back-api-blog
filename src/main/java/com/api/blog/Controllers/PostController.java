@@ -38,9 +38,7 @@ public class PostController {
                 .toUri();
 
         return ResponseEntity.created(location).body(post);
-
     }
-
 
     @DeleteMapping("/delete/{postId}")
     public ResponseEntity<Void> delete (@PathVariable Long postId){
@@ -57,8 +55,5 @@ public class PostController {
     public ResponseEntity<LikeResponseDTO> toggleLike(@PathVariable Long postId, Principal principal){
         return ResponseEntity.ok(likeService.toggleLike(postId, principal.getName()));
     }
-
-
-
 
 }

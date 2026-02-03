@@ -1,5 +1,6 @@
 package com.api.blog.Service;
 
+import com.api.blog.ErrorHandling.customExceptions.ResourceNotFoundException;
 import com.api.blog.DTOs.LikeResponseDTO;
 import com.api.blog.Model.Post;
 import com.api.blog.Model.PostLike;
@@ -9,11 +10,9 @@ import com.api.blog.Repositories.PostRepository;
 import com.api.blog.Repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 
@@ -30,7 +29,8 @@ public class LikeService {
     public LikeResponseDTO toggleLike(Long idPost, String currentUser){
 
         Post post = postRepository.findById(idPost).orElseThrow(() -> new NoSuchElementException("Post no found for id: " + idPost));
-        User user = userRepository.findByUsername(currentUser);
+        User user = userRepository.findByUsername(currentUser).orElseThrow(
+                () -> new ResourceNotFoundException("Couldn't find user: " + currentUser));
 
         if(likePostRepository.existsByUserAndPost(user,post)){
             likePostRepository.deleteByUserAndPost(user,post);
