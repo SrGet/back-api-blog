@@ -1,6 +1,7 @@
 package com.api.blog.Service;
 
 import com.api.blog.DTOs.EditPostDTO;
+import com.api.blog.ErrorHandling.customExceptions.ResourceNotFoundException;
 import com.api.blog.DTOs.NewPostDto;
 import com.api.blog.DTOs.PostResponseDTO;
 import com.api.blog.Mappers.PostMapper;
@@ -19,8 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
-import java.util.NoSuchElementException;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -36,7 +35,8 @@ public class PostService {
     @Transactional
     public PostResponseDTO create(NewPostDto newPost, String username){
 
-        User user = userRepository.findByUsername(username);
+        User user = userRepository.findByUsername(username).orElseThrow(
+                () -> new ResourceNotFoundException("Couldn't find user: " + username));
 
         String keyFile = minIOService.uploadFile(newPost.getFile());
 
@@ -66,8 +66,11 @@ public class PostService {
     // Get single postDTO by ID
     public PostResponseDTO getPostDTO(Long idPost, String currentUsername){
 
-        User user = userRepository.findByUsername(currentUsername);
-        Post post = postRepository.findById(idPost).orElseThrow(() -> new NoSuchElementException("Couldn't find post with id: " + idPost));
+        User user = userRepository.findByUsername(currentUsername).orElseThrow(
+                () -> new ResourceNotFoundException("Couldn't find user: " + currentUsername));
+
+        Post post = postRepository.findById(idPost).orElseThrow(
+                () -> new ResourceNotFoundException("Couldn't find post with id: " + idPost));
 
         boolean owner = user.getUsername().equals(post.getUser().getUsername());
         boolean isLiked = likeService.isLiked(user,post);
@@ -78,7 +81,7 @@ public class PostService {
     // Get single PostEntity by ID
     public Post getPostEntity(Long idPost){
         return postRepository.findById(idPost).orElseThrow(()
-                -> new NoSuchElementException("Couldn't find post with id: " + idPost));
+                -> new ResourceNotFoundException("Couldn't find post with id: " + idPost));
     }
 
 
@@ -108,7 +111,9 @@ public class PostService {
 
     // Update Post
     public PostResponseDTO update(EditPostDTO editPostDTO, String currentUsername){
-        User user = userRepository.findByUsername(currentUsername);
+
+        User user = userRepository.findByUsername(currentUsername).orElseThrow(
+                () -> new ResourceNotFoundException("Couldn't find user: " + currentUsername));
 
         Post oldPost = getPostEntity(editPostDTO.getPostId());
 
@@ -131,7 +136,8 @@ public class PostService {
     }
 
     public Page<Post> getUserPosts(Pageable pageable, String username){
-        User user = userRepository.findByUsername(username);
+        User user = userRepository.findByUsername(username).orElseThrow(
+                () -> new ResourceNotFoundException("Couldn't find user: " + username));
         return postRepository.findAllByUserId(pageable, user.getId());
 
     }

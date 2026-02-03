@@ -1,5 +1,6 @@
 package com.api.blog.Service;
 
+import com.api.blog.ErrorHandling.customExceptions.ResourceNotFoundException;
 import com.api.blog.DTOs.FollowResponseDTO;
 import com.api.blog.Model.Follows;
 import com.api.blog.Model.User;
@@ -9,8 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -23,8 +22,11 @@ public class FollowService {
     @Transactional
     public FollowResponseDTO toggleFollow(String follower, String followTarget ){
 
-        User currentUser = userRepository.findByUsername(follower);
-        User followedUser = userRepository.findByUsername(followTarget);
+        User currentUser = userRepository.findByUsername(follower).orElseThrow(
+                () -> new ResourceNotFoundException("Couldn't find user: " + follower));
+
+        User followedUser = userRepository.findByUsername(followTarget).orElseThrow(
+                () -> new ResourceNotFoundException("Couldn't find user: " + followTarget));
 
         if(currentUser.getId().equals(followedUser.getId())){
             throw  new IllegalArgumentException("Cannot follow yourself :/");
