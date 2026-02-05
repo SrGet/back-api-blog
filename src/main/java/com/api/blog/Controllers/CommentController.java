@@ -41,4 +41,10 @@ public class CommentController {
         return ResponseEntity.ok(commentService.getPostComments(pageNo,pageSize,postId, principal.getName()));
 
     }
+
+    @PatchMapping("/delete/{commentId}")
+    public ResponseEntity<Void> delete(@PathVariable Long commentId){
+        commentService.delete(commentId);
+        return ResponseEntity.ok().build();
+    }
 }

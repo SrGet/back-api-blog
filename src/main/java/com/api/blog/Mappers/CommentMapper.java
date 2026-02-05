@@ -18,6 +18,7 @@ public class CommentMapper {
                 .message(comment.getMessage())
                 .owner(owner)
                 .imgUrl(comment.getImgUrl() != null ? "/file/" + comment.getImgUrl() : null )
+                .deletedAt(comment.getDeleted_at())
                 .build();
     }
 }
