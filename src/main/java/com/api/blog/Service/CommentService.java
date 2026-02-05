@@ -16,6 +16,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.NoSuchElementException;
 
 @Service
@@ -57,6 +59,7 @@ public class CommentService {
     }
 
     public CommentResponse getCommentDTO(Comments comment, Long postId, String currentUser){
+
         String username = comment.getUser().getUsername();
         boolean isOwner = username.equals(currentUser);
 
@@ -65,17 +68,26 @@ public class CommentService {
         return commentMapper.toResponseDTO(comment, postId, username,isOwner);
     }
 
-    public Page<CommentResponse> getPostComments(int pageNo, int pageSize, Long postId, String username){
+    public Page<CommentResponse> getPostComments(int pageNo, int pageSize, Long postId, String currentUser){
 
+        log.info("Ejecutando metodo findAllByPostId para traer los comentarios de un post");
         Page<Comments> commentsList = commentRepository.findAllByPostId(PageRequest.of(pageNo,pageSize), postId);
         if(commentsList != null){
-            return commentsList.map(comment -> getCommentDTO(comment, postId, username));
+            return commentsList.map(comment -> getCommentDTO(comment, postId, currentUser));
         }else {
             return null;
         }
 
     }
 
+    public void delete(Long commentId){
+        Comments comment = commentRepository.findById(commentId).orElseThrow(
+                () -> new ResourceNotFoundException("Comment not found"));
 
+        comment.setDeleted_at(LocalDateTime.now());
+        commentRepository.save(comment);
+
+
+    }
 
 }

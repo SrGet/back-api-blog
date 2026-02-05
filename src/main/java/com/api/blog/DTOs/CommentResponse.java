@@ -18,5 +18,6 @@ public class CommentResponse {
     private String imgUrl;
     private boolean owner;
     private LocalDateTime createdAt;
+    private LocalDateTime deletedAt;
 
 }
