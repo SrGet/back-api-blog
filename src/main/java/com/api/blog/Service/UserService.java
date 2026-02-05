@@ -6,6 +6,7 @@ import com.api.blog.Model.User;
 import com.api.blog.Repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -61,6 +62,7 @@ public class UserService {
     }
 
 
-
-
+    public UserDetails getUserByUsername(String username) {
+        return userRepository.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    }
 }

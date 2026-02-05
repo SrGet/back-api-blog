@@ -2,6 +2,7 @@ package com.api.blog.Model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLRestriction;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
+@SQLRestriction("deleted_at IS NULL")
 public class Comments {
 
     @Id
@@ -26,8 +28,9 @@ public class Comments {
     private User user;
 
     @JoinColumn(name = "post_id", nullable = false)
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Post post;
+
 
     private String message;
     @Column(name = "img_url")
@@ -39,4 +42,5 @@ public class Comments {
     @LastModifiedDate
     private LocalDateTime modifiedAt;
 
+    private LocalDateTime deleted_at;
 }
