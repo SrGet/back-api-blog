@@ -100,13 +100,6 @@
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.keycloak/keycloak-admin-client -->
-		<dependency>
-			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-admin-client</artifactId>
-			<version>26.0.6</version>
-		</dependency>
-
 		<!-- https://mvnrepository.com/artifact/org.jboss.resteasy/resteasy-core-spi -->
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
