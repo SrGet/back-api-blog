@@ -55,7 +55,6 @@ public class LikeService {
     }
 
     public boolean isLiked(User user, Post post){
-        log.info("Counting likes for User: {} and Post: {}",user.getUsername(),post.getId());
         return likePostRepository.existsByUserAndPost(user,post);
 
     }

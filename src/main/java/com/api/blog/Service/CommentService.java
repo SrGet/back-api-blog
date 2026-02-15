@@ -50,7 +50,6 @@ public class CommentService {
 
         try{
             Comments commentCreated = commentRepository.save(comment);
-            log.info("Comment creating successful. Returning DTO");
             return getCommentDTO(commentCreated, post.getId(),currentUsername);
         } catch (Exception e) {
             log.error("Couldn't save post. Deleting file. Reason: {}", e.getMessage());
@@ -62,15 +61,11 @@ public class CommentService {
 
         String username = comment.getUser().getUsername();
         boolean isOwner = username.equals(currentUser);
-
-        log.info("CommentUser: {} --- CurrentUser: {}",username, currentUser );
-
         return commentMapper.toResponseDTO(comment, postId, username,isOwner);
     }
 
     public Page<CommentResponse> getPostComments(int pageNo, int pageSize, Long postId, String currentUser){
 
-        log.info("Ejecutando metodo findAllByPostId para traer los comentarios de un post");
         Page<Comments> commentsList = commentRepository.findAllByPostId(PageRequest.of(pageNo,pageSize), postId);
         if(commentsList != null){
             return commentsList.map(comment -> getCommentDTO(comment, postId, currentUser));
