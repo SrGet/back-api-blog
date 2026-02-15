@@ -27,7 +27,6 @@ public class BlackListService {
         if(ttl > 0){
             try{
                 redisTemplate.opsForValue().set(jti, "Blacklisted", ttl, TimeUnit.SECONDS);
-                log.info("Blacklisting JWT successful");
             }catch (Exception e){
                 log.error("Blacklisting JWT failed. Reason: {}", e.getMessage());
 

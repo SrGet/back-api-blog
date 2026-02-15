@@ -38,6 +38,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/file/**").permitAll()
+                        .requestMatchers("/api/notification/**").hasAuthority("USER")
                         .requestMatchers("/api/comment/**").hasAuthority("USER")
                         .requestMatchers("/api/follow/**").hasAuthority("USER")
                         .requestMatchers("/api/user/**").hasAuthority("USER")

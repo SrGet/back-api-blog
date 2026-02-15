@@ -38,7 +38,6 @@ public class MinIOService {
 
         try {
             s3Client.putObject(putObjectRequest, software.amazon.awssdk.core.sync.RequestBody.fromBytes(file.getBytes()));
-            log.info("File uploading successful");
         } catch (IOException e) {
             log.error("File uploading failed. Reason: {}",e.getMessage());
             throw new RuntimeException(e.getMessage());
@@ -53,9 +52,7 @@ public class MinIOService {
                     .bucket(bucketName)
                     .key(keyFile)
                     .build();
-
             s3Client.deleteObject(deleteObjectRequest);
-            log.info("File deleting successful");
         } catch (AwsServiceException e) {
             log.error("File deleting failed. Reason: {}",e.getMessage());
             throw new RuntimeException(e.getMessage());
@@ -69,7 +66,6 @@ public class MinIOService {
                 .bucket(bucketName)
                 .key(key)
                 .build();
-        log.info("Returning object for key: {}",key);
         return s3Client.getObject(getObjectRequest);
     }
 
