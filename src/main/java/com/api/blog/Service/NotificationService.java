@@ -7,20 +7,19 @@ import com.api.blog.Model.Notification;
 import com.api.blog.Model.User;
 import com.api.blog.Repositories.NotificationRepository;
 import com.api.blog.Repositories.UserRepository;
+import jakarta.persistence.Table;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class NotificacionService {
+public class NotificationService {
 
     private final UserRepository userRepository;
     private final NotificationRepository notificationRepository;
@@ -41,6 +40,7 @@ public class NotificacionService {
 
     }
 
+    @Transactional
     public Page<NotificationResponse> getNotifications(String currentUser, Pageable pageable){
 
         User current = userRepository.findByUsername(currentUser).orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -50,6 +50,7 @@ public class NotificacionService {
         String keyNotify = "notifications:unread:" + current.getId();
         redisTemplate.delete(keyNotify);
 
+        notificationRepository.setAlreadyReadAsTrueByRecipient(current);
 
         return notifications.map(notificationMapper::toDto);
 
@@ -62,6 +63,8 @@ public class NotificacionService {
         if(stringCount != null){
             return Long.parseLong(stringCount);
         }
-        return 0L;
+        Long countDb = notificationRepository.countByRecipientAndAlreadyReadFalse(current);
+        redisTemplate.opsForValue().set("notifications:unread:" + current.getId(), countDb.toString());
+        return countDb;
     }
 }

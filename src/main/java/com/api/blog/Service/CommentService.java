@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -30,6 +31,7 @@ public class CommentService {
     private final PostRepository postRepository;
     private final MinIOService minIOService;
     private final CommentMapper commentMapper;
+    private final StringRedisTemplate redisTemplate;
 
 
     public CommentResponse create(String currentUsername, NewCommentRequest newComment){
@@ -50,6 +52,7 @@ public class CommentService {
 
         try{
             Comments commentCreated = commentRepository.save(comment);
+            redisTemplate.opsForValue().increment("comments:amount:" + post.getId());
             return getCommentDTO(commentCreated, post.getId(),currentUsername);
         } catch (Exception e) {
             log.error("Couldn't save post. Deleting file. Reason: {}", e.getMessage());
@@ -81,8 +84,20 @@ public class CommentService {
 
         comment.setDeleted_at(LocalDateTime.now());
         commentRepository.save(comment);
+        redisTemplate.opsForValue().decrement("comments:amount:"+ comment.getPost().getId());
 
 
+    }
+
+    public Long getCommentsAmount(Long idPost){
+        String commentsAmount = redisTemplate.opsForValue().get("comments:amount:"+idPost);
+        if (commentsAmount != null){
+            return Long.parseLong(commentsAmount);
+        }
+
+        Long dbCount = commentRepository.countByPostId(idPost);
+        redisTemplate.opsForValue().set("comments:amount:"+idPost, dbCount.toString());
+        return dbCount;
     }
 
 }

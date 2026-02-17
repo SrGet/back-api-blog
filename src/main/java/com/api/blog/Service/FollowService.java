@@ -10,8 +10,11 @@ import com.api.blog.notifications.events.FollowEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +24,7 @@ public class FollowService {
     private final FollowRepository followRepository;
     private final UserRepository userRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final StringRedisTemplate redisTemplate;
 
     @Transactional
     public FollowResponseDTO toggleFollow(String follower, String followTarget ){
@@ -40,7 +44,10 @@ public class FollowService {
         if (followRepository.existsByFollowerAndFollowed(currentUser,followedUser)){
 
             followRepository.deleteByFollowerAndFollowed(currentUser,followedUser);
-            Long followersCount = followRepository.countByFollowed(followedUser);
+
+            Long followersCount = redisTemplate.opsForValue().decrement("followers:amount:" + followedUser.getId());
+            redisTemplate.opsForValue().decrement("followed:amount:" + currentUser.getId());
+
             return FollowResponseDTO.builder()
                     .followed(false)
                     .followersCount(followersCount)
@@ -54,9 +61,12 @@ public class FollowService {
 
         followRepository.save(followerFollowed);
 
+        //  *** Notification event ***
         applicationEventPublisher.publishEvent(new FollowEvent(currentUser, followedUser));
 
-        Long followersCount = followRepository.countByFollowed(followedUser);
+
+        Long followersCount = redisTemplate.opsForValue().increment("followers:amount:" + followedUser.getId());
+        redisTemplate.opsForValue().increment("following:amount:" + currentUser.getId());
 
         return FollowResponseDTO.builder()
                 .followed(true)
@@ -65,13 +75,27 @@ public class FollowService {
 
     }
 
-
     public Long getFollowingCount(User follower){
-        return followRepository.countByFollower(follower);
+        String count = redisTemplate.opsForValue().get("following:amount:" + follower.getId());
+        log.info("FollowingCount: {}",count);
+        if (count != null){
+            return Long.parseLong(count);
+        }
+        Long countDb = followRepository.countByFollower(follower);
+        redisTemplate.opsForValue().set("following:amount:" + follower.getId(), countDb.toString());
+        return countDb;
     }
 
-    public Long getFollowersCount(User follower){
-        return followRepository.countByFollowed(follower);
+    public Long getFollowersCount(User followed){
+        String count = redisTemplate.opsForValue().get("followers:amount:" + followed.getId());
+        log.info("FollowersCount: {}",count);
+        if (count != null){
+            return Long.parseLong(count);
+        }
+
+        Long countDb = followRepository.countByFollowed(followed);
+        redisTemplate.opsForValue().set("followers:amount:" + followed.getId(), countDb.toString());
+        return countDb;
     }
 
     public boolean isFollowed(User currentUser, User targetUser){

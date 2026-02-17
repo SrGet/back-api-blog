@@ -34,6 +34,8 @@ public class UserService {
 
     public UserProfileDTO getProfile(String currentUser,String username){
 
+
+
         User authuser = userRepository.findByUsername(currentUser).orElseThrow(
                 () -> new ResourceNotFoundException("Couldn't find user: " + currentUser));
 
@@ -55,10 +57,6 @@ public class UserService {
                 .postsCount(postsCount)
                 .followed(followed)
                 .build();
-
-
-
-
     }
 
 

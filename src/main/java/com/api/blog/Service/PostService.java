@@ -14,11 +14,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.NoSuchElementException;
 
 @Slf4j
 @Service
@@ -30,6 +32,8 @@ public class PostService {
     private final PostRepository postRepository;
     private final PostMapper postMapper;
     private final LikeService likeService;
+    private final StringRedisTemplate redisTemplate;
+    private final CommentService commentService;
 
     // Create Post
     @Transactional
@@ -49,9 +53,10 @@ public class PostService {
                     .user(user)
                     .build();
 
-           Post postCreated = postRepository.save(post);
+            Post postCreated = postRepository.save(post);
             log.info("Post creation successful. Returning DTO");
-            return getPostDTO(postCreated.getId(), username);
+            redisTemplate.opsForValue().increment("posts:amount:" + user.getId());
+            return getPostDTO(postCreated, user);
 
         } catch (Exception e) {
 
@@ -64,33 +69,26 @@ public class PostService {
     }
 
     // Get single postDTO by ID
-    public PostResponseDTO getPostDTO(Long idPost, String currentUsername){
+    public PostResponseDTO getPostDTO(Post post, User currentUser){
 
-        User user = userRepository.findByUsername(currentUsername).orElseThrow(
-                () -> new ResourceNotFoundException("Couldn't find user: " + currentUsername));
+        boolean owner = currentUser.getUsername().equals(post.getUser().getUsername());
+        boolean isLiked = likeService.isLiked(currentUser,post);
 
-        Post post = postRepository.findById(idPost).orElseThrow(
-                () -> new ResourceNotFoundException("Couldn't find post with id: " + idPost));
+        Long likesAmount = likeService.getLikesCount(post);
 
-        boolean owner = user.getUsername().equals(post.getUser().getUsername());
-        boolean isLiked = likeService.isLiked(user,post);
+        Long commentsAmount = commentService.getCommentsAmount(post.getId());
 
-        return postMapper.toResponseDto(post,isLiked, owner, user.getProfileImgKey());
-    }
-
-    // Get single PostEntity by ID
-    public Post getPostEntity(Long idPost){
-        return postRepository.findById(idPost).orElseThrow(()
-                -> new ResourceNotFoundException("Couldn't find post with id: " + idPost));
+        return postMapper.toResponseDto(post,isLiked, owner, post.getUser().getProfileImgKey(), likesAmount, commentsAmount);
     }
 
 
      // Delete user post
-    public void delete (Long postId){
+    public void delete (Long postId,String currentUser){
 
-        Post post = getPostEntity(postId);
+        Post post = postRepository.findById(postId).orElseThrow(() -> new ResourceNotFoundException("Post not found."));
 
-        if(!post.getUser().getUsername().equals(SecurityContextHolder.getContext().getAuthentication().getName())){
+
+        if(!post.getUser().getUsername().equals(currentUser)){
             throw new AccessDeniedException("You are not allowed to delete this post.");
         }
 
@@ -106,7 +104,7 @@ public class PostService {
         }
         postRepository.save(post);
         log.info("Soft-deleting successful for post: {} ", postId);
-
+        redisTemplate.opsForValue().decrement("posts:amount:" + post.getUser().getId());
     }
 
     // Update Post
@@ -115,7 +113,7 @@ public class PostService {
         User user = userRepository.findByUsername(currentUsername).orElseThrow(
                 () -> new ResourceNotFoundException("Couldn't find user: " + currentUsername));
 
-        Post oldPost = getPostEntity(editPostDTO.getPostId());
+        Post oldPost = postRepository.findById(editPostDTO.getPostId()).orElseThrow(() -> new NoSuchElementException("Post not found."));
 
         if(!oldPost.getUser().getUsername().equals(user.getUsername())){
             throw new AccessDeniedException("You are not allowed to delete this post.");
@@ -125,13 +123,13 @@ public class PostService {
             oldPost.setMessage(editPostDTO.getNewMessage());
         }
         Post editedPost = postRepository.save(oldPost);
-        return getPostDTO(editedPost.getId(), currentUsername);
+        return getPostDTO(editedPost, user);
 
     }
 
     // Get LastsPosts
     public Page<Post> getLastsPosts(Pageable pageable){
-        return postRepository.findAll(pageable);
+        return postRepository.findPostsWithUsers(pageable);
 
     }
 
@@ -143,7 +141,13 @@ public class PostService {
     }
 
     public Long postsCount(User user){
-        return postRepository.countByUser(user);
+        String count = redisTemplate.opsForValue().get("posts:amount:" + user.getId());
+        if (count != null) {
+            return  Long.parseLong(count);
+        }
+        Long dbCount = postRepository.countByUser(user);
+        redisTemplate.opsForValue().set("posts:amount:"+user.getId(),dbCount.toString());
+        return dbCount;
     }
 
 }
