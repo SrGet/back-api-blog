@@ -1,6 +1,6 @@
 package com.api.blog.notifications;
 
-import com.api.blog.Service.NotificacionService;
+import com.api.blog.Service.NotificationService;
 import com.api.blog.notifications.events.FollowEvent;
 
 import lombok.RequiredArgsConstructor;
@@ -14,12 +14,12 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class FollowNotificationListener {
 
-    private final NotificacionService notificacionService;
+    private final NotificationService notificationService;
 
     @EventListener
     @Async
     public void handle(FollowEvent event){
-        notificacionService.createFollowNotification(event.followed(), event.follower());
+        notificationService.createFollowNotification(event.followed(), event.follower());
 
     }
 

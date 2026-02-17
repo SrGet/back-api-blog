@@ -37,9 +37,11 @@ public class FeedController {
     @GetMapping("/userPosts")
     public ResponseEntity<Page<PostResponseDTO>> getUserPosts(@RequestParam int pageNo,
                                                               @RequestParam int pageSize,
-                                                              @RequestParam String targetUsername,
+                                                              @RequestParam String userTarget,
                                                               Principal principal){
 
-        return ResponseEntity.ok(feedService.getUserFeed(pageNo,pageSize, principal.getName(), targetUsername));
+
+
+        return ResponseEntity.ok(feedService.getUserFeed(pageNo,pageSize, principal.getName(), userTarget));
     }
 }

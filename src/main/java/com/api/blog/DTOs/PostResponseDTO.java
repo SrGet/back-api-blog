@@ -17,7 +17,7 @@ public class PostResponseDTO {
     private String imgPostUrl;
     private String imgUserUrl;
     private boolean likedByCurrentUser;
-    private int commentsAmount;
+    private Long commentsAmount;
     private boolean owner;
     private LocalDateTime deleted_at;
     private Long likes;

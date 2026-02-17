@@ -19,9 +19,9 @@ public class FollowController {
 
     private final FollowService followService;
 
-    @PostMapping("/{targetUsername}")
-    public ResponseEntity<FollowResponseDTO> follow(Principal principal,@PathVariable String targetUsername){
-        return ResponseEntity.ok(followService.toggleFollow(principal.getName(), targetUsername));
+    @PostMapping("/{userTarget}")
+    public ResponseEntity<FollowResponseDTO> follow(Principal principal,@PathVariable String userTarget){
+        return ResponseEntity.ok(followService.toggleFollow(principal.getName(), userTarget));
     }
 
 
