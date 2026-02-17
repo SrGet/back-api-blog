@@ -26,9 +26,11 @@ public class UserController {
 
 
     @GetMapping("/profile")
-    public ResponseEntity<UserProfileDTO> getProfile(Principal principal,@RequestParam String username){
+    public ResponseEntity<UserProfileDTO> getProfile(Principal principal,@RequestParam String userTarget){
+        System.out.println("Principal: " + principal);
+        System.out.println("userTarget in userController: " + userTarget);
 
-        return ResponseEntity.ok(userService.getProfile(principal.getName(), username));
+        return ResponseEntity.ok(userService.getProfile(principal.getName(), userTarget));
 
     }
 
