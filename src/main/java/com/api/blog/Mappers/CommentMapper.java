@@ -9,14 +9,16 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CommentMapper {
 
-    public CommentResponse toResponseDTO (Comments comment, Long postId, String username, boolean owner){
+    public CommentResponse toResponseDTO (Comments comment, Long postId, boolean owner, boolean alreadyLiked, Long likesAmount){
         return CommentResponse.builder()
                 .id(comment.getId())
                 .postId(postId)
-                .username(username)
+                .ownerUsername(comment.getUser().getUsername())
                 .createdAt(comment.getCreatedAt())
                 .message(comment.getMessage())
                 .owner(owner)
+                .liked(alreadyLiked)
+                .likesAmount(likesAmount)
                 .imgUrl(comment.getImgUrl() != null ? "/file/" + comment.getImgUrl() : null )
                 .deletedAt(comment.getDeleted_at())
                 .build();

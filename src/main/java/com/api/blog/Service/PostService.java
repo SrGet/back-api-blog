@@ -16,7 +16,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -72,9 +71,9 @@ public class PostService {
     public PostResponseDTO getPostDTO(Post post, User currentUser){
 
         boolean owner = currentUser.getUsername().equals(post.getUser().getUsername());
-        boolean isLiked = likeService.isLiked(currentUser,post);
+        boolean isLiked = likeService.isPostLiked(currentUser,post);
 
-        Long likesAmount = likeService.getLikesCount(post);
+        Long likesAmount = likeService.getPostLikesCount(post);
 
         Long commentsAmount = commentService.getCommentsAmount(post.getId());
 
