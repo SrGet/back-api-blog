@@ -10,6 +10,7 @@ import com.api.blog.Repositories.PostRepository;
 import com.api.blog.Repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
@@ -24,6 +25,8 @@ public class LikeService {
     private final LikePostRepository likePostRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final StringRedisTemplate redisTemplate;
+
 
     @Transactional
     public LikeResponseDTO toggleLike(Long idPost, String currentUser){
@@ -34,9 +37,10 @@ public class LikeService {
 
         if(likePostRepository.existsByUserAndPost(user,post)){
             likePostRepository.deleteByUserAndPost(user,post);
+            Long likesAmount = redisTemplate.opsForValue().decrement("likes:amount:" + idPost);
             return LikeResponseDTO.builder()
                     .liked(false)
-                    .likeAmount(likePostRepository.countByPost(post))
+                    .likeAmount(likesAmount)
                     .build();
         }
 
@@ -47,9 +51,10 @@ public class LikeService {
                 .build();
 
         likePostRepository.save(like);
+        Long likesAmount = redisTemplate.opsForValue().increment("likes:amount:" + idPost);
         return LikeResponseDTO.builder()
                 .liked(true)
-                .likeAmount(likePostRepository.countByPost(post))
+                .likeAmount(likesAmount)
                 .build();
 
     }
@@ -57,6 +62,17 @@ public class LikeService {
     public boolean isLiked(User user, Post post){
         return likePostRepository.existsByUserAndPost(user,post);
 
+    }
+
+    public Long getLikesCount(Post post){
+        String count = redisTemplate.opsForValue().get("likes:amount:" + post.getId());
+        if (count != null){
+            return Long.parseLong(count);
+        }
+
+        Long dbCount = likePostRepository.countByPost(post);
+        redisTemplate.opsForValue().set("likes:amount:"+post.getId(), dbCount.toString());
+        return dbCount;
     }
 
 }

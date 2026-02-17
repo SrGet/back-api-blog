@@ -14,10 +14,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class PostMapper {
 
-
-
-    public PostResponseDTO toResponseDto(Post post,boolean isLikedByCurrentUser, boolean owner, String imgUserUrl ){
-
+    public PostResponseDTO toResponseDto(Post post,boolean isLikedByCurrentUser,
+                                         boolean owner, String imgUserUrl, Long likesAmount, Long commentsAmount ){
 
         if (post == null){
             return null;
@@ -29,8 +27,8 @@ public class PostMapper {
                 .imgPostUrl(post.getImageUrl() != null ? "/file/"+post.getImageUrl() : null)
                 .imgUserUrl(imgUserUrl != null ? "/file/"+post.getImageUrl() : null)
                 .user(post.getUser().getUsername())
-                .likes((long) post.getLikes().size())
-                .commentsAmount(post.getComments().size())
+                .likes(likesAmount)
+                .commentsAmount(commentsAmount)
                 .likedByCurrentUser(isLikedByCurrentUser)
                 .owner(owner)
                 .deleted_at(post.getDeleted_at())
