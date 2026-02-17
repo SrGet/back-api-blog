@@ -12,11 +12,13 @@ import java.time.LocalDateTime;
 public class CommentResponse {
 
     private Long id;
-    private String username;
+    private String ownerUsername;
     private Long postId;
     private String message;
     private String imgUrl;
     private boolean owner;
+    private Long likesAmount;
+    private boolean liked;
     private LocalDateTime createdAt;
     private LocalDateTime deletedAt;
 

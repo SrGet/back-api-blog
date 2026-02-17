@@ -1,8 +1,10 @@
 package com.api.blog.Controllers;
 
+import com.api.blog.DTOs.LikeResponseDTO;
 import com.api.blog.DTOs.NewCommentRequest;
 import com.api.blog.DTOs.CommentResponse;
 import com.api.blog.Service.CommentService;
+import com.api.blog.Service.LikeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +20,7 @@ import java.security.Principal;
 public class CommentController {
 
     private final CommentService commentService;
+    private final LikeService likeService;
 
     @PostMapping("/create")
     public ResponseEntity<CommentResponse> create(Principal principal, @ModelAttribute NewCommentRequest newCommentRequest){
@@ -46,5 +49,10 @@ public class CommentController {
     public ResponseEntity<Void> delete(@PathVariable Long commentId){
         commentService.delete(commentId);
         return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/like/{commentId}")
+    public ResponseEntity<LikeResponseDTO> toggleLike(@PathVariable Long commentId, Principal principal){
+        return ResponseEntity.ok(likeService.toggleCommentLike(commentId, principal.getName()));
     }
 }

@@ -7,16 +7,11 @@ import com.api.blog.DTOs.PostResponseDTO;
 import com.api.blog.Service.LikeService;
 import com.api.blog.Service.PostService;
 import lombok.RequiredArgsConstructor;
-import org.apache.http.protocol.HTTP;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.security.Principal;
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/post")
@@ -53,7 +48,7 @@ public class PostController {
 
     @PatchMapping("/like/{postId}")
     public ResponseEntity<LikeResponseDTO> toggleLike(@PathVariable Long postId, Principal principal){
-        return ResponseEntity.ok(likeService.toggleLike(postId, principal.getName()));
+        return ResponseEntity.ok(likeService.togglePostLike(postId, principal.getName()));
     }
 
 }
