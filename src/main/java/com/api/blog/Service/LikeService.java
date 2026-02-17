@@ -2,12 +2,8 @@ package com.api.blog.Service;
 
 import com.api.blog.ErrorHandling.customExceptions.ResourceNotFoundException;
 import com.api.blog.DTOs.LikeResponseDTO;
-import com.api.blog.Model.Post;
-import com.api.blog.Model.PostLike;
-import com.api.blog.Model.User;
-import com.api.blog.Repositories.LikePostRepository;
-import com.api.blog.Repositories.PostRepository;
-import com.api.blog.Repositories.UserRepository;
+import com.api.blog.Model.*;
+import com.api.blog.Repositories.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -23,13 +19,17 @@ import java.util.NoSuchElementException;
 public class LikeService {
 
     private final LikePostRepository likePostRepository;
+    private final CommentLikeRepository commentLikeRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
     private final StringRedisTemplate redisTemplate;
 
 
+
+
     @Transactional
-    public LikeResponseDTO toggleLike(Long idPost, String currentUser){
+    public LikeResponseDTO togglePostLike(Long idPost, String currentUser){
 
         Post post = postRepository.findById(idPost).orElseThrow(() -> new NoSuchElementException("Post no found for id: " + idPost));
         User user = userRepository.findByUsername(currentUser).orElseThrow(
@@ -37,7 +37,7 @@ public class LikeService {
 
         if(likePostRepository.existsByUserAndPost(user,post)){
             likePostRepository.deleteByUserAndPost(user,post);
-            Long likesAmount = redisTemplate.opsForValue().decrement("likes:amount:" + idPost);
+            Long likesAmount = redisTemplate.opsForValue().decrement("post:likes:amount:" + idPost);
             return LikeResponseDTO.builder()
                     .liked(false)
                     .likeAmount(likesAmount)
@@ -51,7 +51,7 @@ public class LikeService {
                 .build();
 
         likePostRepository.save(like);
-        Long likesAmount = redisTemplate.opsForValue().increment("likes:amount:" + idPost);
+        Long likesAmount = redisTemplate.opsForValue().increment("post:likes:amount:" + idPost);
         return LikeResponseDTO.builder()
                 .liked(true)
                 .likeAmount(likesAmount)
@@ -59,19 +59,70 @@ public class LikeService {
 
     }
 
-    public boolean isLiked(User user, Post post){
+    @Transactional
+    public LikeResponseDTO toggleCommentLike(Long commentId, String currentUser){
+
+        User authUser = userRepository.findByUsername(currentUser).orElseThrow(
+                () -> new ResourceNotFoundException("Couldn't find user: " + currentUser));
+
+        Comments comment = commentRepository.findById(commentId).orElseThrow(
+                () -> new ResourceNotFoundException("Comment not found."));
+
+        // ** Delete like if already liked**
+        if(commentLikeRepository.existsByUserAndComments(authUser,comment)){
+
+            commentLikeRepository.deleteByUserAndComments(authUser,comment);
+            Long likesCount = redisTemplate.opsForValue().decrement("comment:likes:amount:"+ commentId);
+
+            return LikeResponseDTO.builder()
+                    .liked(false)
+                    .likeAmount(likesCount)
+                    .build();
+        }
+
+        // ** Otherwise add like **
+        CommentLike commentLike = CommentLike.builder()
+                .user(authUser)
+                .comments(comment)
+                .build();
+        commentLikeRepository.save(commentLike);
+        Long likesCount = redisTemplate.opsForValue().increment("comment:likes:amount:" + commentId);
+        return LikeResponseDTO.builder()
+                .liked(true)
+                .likeAmount(likesCount)
+                .build();
+
+    }
+
+    public boolean isPostLiked(User user, Post post){
         return likePostRepository.existsByUserAndPost(user,post);
 
     }
 
-    public Long getLikesCount(Post post){
-        String count = redisTemplate.opsForValue().get("likes:amount:" + post.getId());
+    public boolean isCommentLiked(User user, Comments comment){
+        return commentLikeRepository.existsByUserAndComments(user,comment);
+
+    }
+
+    public Long getPostLikesCount(Post post){
+        String count = redisTemplate.opsForValue().get("post:likes:amount:" + post.getId());
         if (count != null){
             return Long.parseLong(count);
         }
 
         Long dbCount = likePostRepository.countByPost(post);
-        redisTemplate.opsForValue().set("likes:amount:"+post.getId(), dbCount.toString());
+        redisTemplate.opsForValue().set("post:likes:amount:"+post.getId(), dbCount.toString());
+        return dbCount;
+    }
+
+    public Long getCommentLikesCount(Comments comment){
+        String count = redisTemplate.opsForValue().get("comment:likes:amount:" + comment.getId());
+        if (count != null){
+            return Long.parseLong(count);
+        }
+
+        Long dbCount = commentLikeRepository.countByComments(comment);
+        redisTemplate.opsForValue().set("comment:likes:amount:"+comment.getId(), dbCount.toString());
         return dbCount;
     }
 

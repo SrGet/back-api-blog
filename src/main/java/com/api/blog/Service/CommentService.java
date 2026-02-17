@@ -1,9 +1,11 @@
 package com.api.blog.Service;
 
+import com.api.blog.DTOs.LikeResponseDTO;
 import com.api.blog.ErrorHandling.customExceptions.ResourceNotFoundException;
 import com.api.blog.DTOs.NewCommentRequest;
 import com.api.blog.DTOs.CommentResponse;
 import com.api.blog.Mappers.CommentMapper;
+import com.api.blog.Model.CommentLike;
 import com.api.blog.Model.Comments;
 import com.api.blog.Model.Post;
 import com.api.blog.Model.User;
@@ -32,6 +34,7 @@ public class CommentService {
     private final MinIOService minIOService;
     private final CommentMapper commentMapper;
     private final StringRedisTemplate redisTemplate;
+    private final LikeService likeService;
 
 
     public CommentResponse create(String currentUsername, NewCommentRequest newComment){
@@ -53,25 +56,29 @@ public class CommentService {
         try{
             Comments commentCreated = commentRepository.save(comment);
             redisTemplate.opsForValue().increment("comments:amount:" + post.getId());
-            return getCommentDTO(commentCreated, post.getId(),currentUsername);
+            return getCommentDTO(commentCreated, post.getId(),currentUser);
         } catch (Exception e) {
             log.error("Couldn't save post. Deleting file. Reason: {}", e.getMessage());
             throw new RuntimeException(e);
         }
     }
 
-    public CommentResponse getCommentDTO(Comments comment, Long postId, String currentUser){
+    public CommentResponse getCommentDTO(Comments comment, Long postId, User currentUser){
 
-        String username = comment.getUser().getUsername();
-        boolean isOwner = username.equals(currentUser);
-        return commentMapper.toResponseDTO(comment, postId, username,isOwner);
+        boolean alreadyLiked = likeService.isCommentLiked(currentUser,comment);
+        Long likesAmount = likeService.getCommentLikesCount(comment);
+
+        boolean isOwner = comment.getUser().getUsername().equals(currentUser.getUsername());
+        return commentMapper.toResponseDTO(comment, postId,isOwner, alreadyLiked, likesAmount);
     }
 
     public Page<CommentResponse> getPostComments(int pageNo, int pageSize, Long postId, String currentUser){
+        User authUser = userRepository.findByUsername(currentUser).orElseThrow(
+                () -> new ResourceNotFoundException("Couldn't find user: " + currentUser));
 
         Page<Comments> commentsList = commentRepository.findAllByPostId(PageRequest.of(pageNo,pageSize), postId);
         if(commentsList != null){
-            return commentsList.map(comment -> getCommentDTO(comment, postId, currentUser));
+            return commentsList.map(comment -> getCommentDTO(comment, postId, authUser));
         }else {
             return null;
         }
@@ -94,10 +101,11 @@ public class CommentService {
         if (commentsAmount != null){
             return Long.parseLong(commentsAmount);
         }
-
         Long dbCount = commentRepository.countByPostId(idPost);
         redisTemplate.opsForValue().set("comments:amount:"+idPost, dbCount.toString());
         return dbCount;
     }
+
+
 
 }
