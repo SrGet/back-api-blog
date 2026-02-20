@@ -1,6 +1,7 @@
 package com.api.blog.Config;
 
 import com.api.blog.Service.JwtService;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,6 +11,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -37,22 +39,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
 
-        username = jwtService.getUsernameFromToken(token);
+        try {
+            username = jwtService.getUsernameFromToken(token);
 
-        if(username != null && SecurityContextHolder.getContext().getAuthentication() == null){
+            if(username != null && SecurityContextHolder.getContext().getAuthentication() == null){
 
-            UserDetails user = userDetailsService.loadUserByUsername(username);
+                UserDetails user = userDetailsService.loadUserByUsername(username);
 
 
-            if(jwtService.isTokenValid(token,user)){
+                if(jwtService.isTokenValid(token,user)){
 
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(user,null,user.getAuthorities());
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(user,null,user.getAuthorities());
 
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
 
+                }
             }
+        } catch (ExpiredJwtException e) {
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request,response);
