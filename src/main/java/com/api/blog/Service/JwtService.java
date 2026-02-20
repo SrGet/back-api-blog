@@ -1,5 +1,8 @@
 package com.api.blog.Service;
 
+import com.api.blog.Model.RefreshToken;
+import com.api.blog.Model.User;
+import com.api.blog.Repositories.RefreshTokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -14,6 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.security.Key;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
@@ -26,10 +32,12 @@ public class JwtService {
     @Value("${jwt.secret.key}")
     private String secretKey;
 
+
+
+
     public String getToken(UserDetails user){
         return getToken(new HashMap<>(), user);
     }
-
 
     public String getToken(HashMap<String,Object> extraClaims, UserDetails user){
 
@@ -40,7 +48,7 @@ public class JwtService {
                 .setClaims(extraClaims)
                 .setSubject(user.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000*60*24))
+                .setExpiration(Date.from(Instant.now().plus(Duration.ofMinutes(10))))
                 .signWith(getKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -53,6 +61,7 @@ public class JwtService {
     private Claims getAllClaims(String token){
         return Jwts.parserBuilder()
                 .setSigningKey(getKey())
+                .setAllowedClockSkewSeconds(30)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
@@ -93,6 +102,8 @@ public class JwtService {
     public String getJti(String token){
         return getClaim(token,Claims::getId);
     }
+
+
 
 
 }

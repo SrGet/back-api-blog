@@ -26,8 +26,6 @@ public class LikeService {
     private final StringRedisTemplate redisTemplate;
 
 
-
-
     @Transactional
     public LikeResponseDTO togglePostLike(Long idPost, String currentUser){
 
