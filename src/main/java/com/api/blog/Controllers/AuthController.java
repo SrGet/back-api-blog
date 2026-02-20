@@ -29,8 +29,6 @@ public class AuthController {
     private final AuthService authService;
 
 
-
-
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(@RequestBody @Valid LoginRequestDTO loginRequest){
 
@@ -38,10 +36,10 @@ public class AuthController {
         RefreshToken refreshToken = authService.getRefreshToken(loginRequest.getUsername());
         ResponseCookie responseCookie = ResponseCookie.from("refreshToken", refreshToken.getToken())
                 .httpOnly(true)
-                .secure(false)
+                .secure(true)
                 .path("/")
                 .maxAge(Duration.ofDays(7))
-                .sameSite("Lax")
+                .sameSite("None")
                 .build();
 
         return ResponseEntity.status(HttpStatus.OK).header(HttpHeaders.SET_COOKIE, responseCookie.toString()).body(jwt);
