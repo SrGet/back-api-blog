@@ -19,7 +19,7 @@ public class CommentMapper {
                 .owner(owner)
                 .liked(alreadyLiked)
                 .likesAmount(likesAmount)
-                .imgUrl(comment.getImgUrl() != null ? "/file/" + comment.getImgUrl() : null )
+                .imgUrl(comment.getImgUrl())
                 .deletedAt(comment.getDeleted_at())
                 .build();
     }
