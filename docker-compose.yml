@@ -37,17 +37,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/apiblog
       SPRING_DATASOURCE_USERNAME: domino123
       SPRING_DATASOURCE_PASSWORD: domino123
-      SPRING_REDIS_HOST: redis
-      SPRING_REDIS_PORT: 6379
+      SPRING_REDIS_URL: rediss://default:AZxAAAIncDI5YzY0NTU3NTc0Zjc0MmVkODc1OWIzMjBiYzlhMzgwMnAyNDAwMDA@major-mastodon-40000.upstash.io:6379
 
-  redis:
-    image: redis:7.2.10-alpine
-    ports:
-      - '6379:6379'
-    networks:
-      - blog-network
-    volumes:
-      - redis_data:/data
 
 networks:
   blog-network:
@@ -55,5 +46,4 @@ networks:
 
 volumes:
   mysql_data:
-  redis_data:
-  minio_data:
+

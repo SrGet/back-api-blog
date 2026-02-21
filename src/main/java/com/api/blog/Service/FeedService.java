@@ -30,8 +30,6 @@ public class FeedService {
 
         Page<Post> posts = postService.getLastsPosts(PageRequest.of(pageNo-1,pageSize));
 
-        log.info("Getting lastPosts successful with pageNo: {}, pageSize: {}, Returning DTOs",pageNo-1,pageSize);
-
         return posts.map(post -> postService.getPostDTO(post, authUser));
 
     }

@@ -15,7 +15,8 @@ public class CommentResponse {
     private String ownerUsername;
     private Long postId;
     private String message;
-    private String imgUrl;
+    private String imgCommentUrl;
+    private String imgOwnerUrl;
     private boolean owner;
     private Long likesAmount;
     private boolean liked;

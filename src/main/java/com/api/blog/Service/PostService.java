@@ -49,14 +49,13 @@ public class PostService {
 
             Post post = Post.builder()
                     .message(newPost.getMessage())
-                    .imageUrl(fileResponse.get("secureUrl"))
-                    .imagePublicId(fileResponse.get("imagePublicId"))
+                    .imageUrl(fileResponse != null ? fileResponse.get("secureUrl") : null)
+                    .imagePublicId(fileResponse != null ?  fileResponse.get("PublicId") : null)
                     .deleted_at(null)
                     .user(user)
                     .build();
 
             Post postCreated = postRepository.save(post);
-            log.info("Post creation successful. Returning DTO");
             redisTemplate.opsForValue().increment("posts:amount:" + user.getId());
             return getPostDTO(postCreated, user);
 

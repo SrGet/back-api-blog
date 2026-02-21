@@ -26,7 +26,7 @@ public class CloudinaryService {
                 log.info("UploadResult: {}", uploadResult);
 
                 return Map.of("secureUrl",uploadResult.get("secure_url").toString(),
-                        "imagePublicId", uploadResult.get("public_id").toString());
+                        "publicId", uploadResult.get("public_id").toString());
             }
             return null;
             
