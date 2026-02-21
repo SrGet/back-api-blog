@@ -8,10 +8,11 @@ import org.springframework.stereotype.Component;
 public class NotificationMapper {
 
     public NotificationResponse toDto(Notification notification){
+
         return NotificationResponse.builder()
                 .id(notification.getId())
                 .senderUsername(notification.getSender().getUsername())
-                .senderImgUrl(notification.getSender().getProfileImgKey() != null ? "/file/"+notification.getSender().getProfileImgKey() : null)
+                .senderImgUrl(notification.getSender().getProfileImgKey())
                 .message(notification.getMessage())
                 .alreadyRead(notification.isAlreadyRead())
                 .createdAt(notification.getCreatedAt())

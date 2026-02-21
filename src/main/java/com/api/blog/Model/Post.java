@@ -31,6 +31,9 @@ public class Post {
     @Column(name = "image_url")
     private String imageUrl;
 
+    @Column(name = "image_public_id")
+    private String imagePublicId;
+
     @OneToMany(mappedBy = "post")
     @Builder.Default
     private List<PostLike> likes = new ArrayList<>();

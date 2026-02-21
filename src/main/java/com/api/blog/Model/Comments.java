@@ -36,6 +36,9 @@ public class Comments {
     @Column(name = "img_url")
     private String imgUrl;
 
+    @Column(name = "image_public_id")
+    private String imagePublicId;
+
     @CreatedDate
     private LocalDateTime createdAt;
 

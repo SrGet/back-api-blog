@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 @Service
@@ -31,7 +32,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
-    private final MinIOService minIOService;
+    private final CloudinaryService cloudinaryService;
     private final CommentMapper commentMapper;
     private final StringRedisTemplate redisTemplate;
     private final LikeService likeService;
@@ -44,13 +45,15 @@ public class CommentService {
         User currentUser = userRepository.findByUsername(currentUsername).orElseThrow(
                 () -> new ResourceNotFoundException("Couldn't find user: " + currentUsername));
 
-        String imgKey = minIOService.uploadFile(newComment.getFile());
+
+        Map<String,String> uploadResponse = cloudinaryService.uploadImage(newComment.getFile());
 
         Comments comment = Comments.builder()
                 .user(currentUser)
                 .post(post)
                 .message(newComment.getMessage())
-                .imgUrl(imgKey)
+                .imgUrl(uploadResponse.get("secure_url"))
+                .imagePublicId(uploadResponse.get("public_id"))
                 .build();
 
         try{

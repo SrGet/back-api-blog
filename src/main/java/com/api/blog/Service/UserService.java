@@ -47,7 +47,7 @@ public class UserService {
 
         return UserProfileDTO.builder()
 
-                .profileImgUrl(user.getProfileImgKey() != null ? "/file/"+user.getProfileImgKey() : null)
+                .profileImgUrl(user.getProfileImgKey())
                 .username(user.getUsername())
                 .following(followingAmount)
                 .followers(followersAmount)

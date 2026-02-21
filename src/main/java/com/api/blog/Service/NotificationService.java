@@ -47,6 +47,11 @@ public class NotificationService {
 
         Page<Notification> notifications = notificationRepository.findAllByRecipientOrderByCreatedAtDesc(current, pageable);
 
+        if (notifications.getContent().isEmpty()){
+            return Page.empty();
+        }
+
+
         String keyNotify = "notifications:unread:" + current.getId();
         redisTemplate.delete(keyNotify);
 

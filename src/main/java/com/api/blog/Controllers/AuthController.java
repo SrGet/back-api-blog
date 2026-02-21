@@ -36,10 +36,10 @@ public class AuthController {
         RefreshToken refreshToken = authService.getRefreshToken(loginRequest.getUsername());
         ResponseCookie responseCookie = ResponseCookie.from("refreshToken", refreshToken.getToken())
                 .httpOnly(true)
-                .secure(true)
+                .secure(false)
                 .path("/")
                 .maxAge(Duration.ofDays(7))
-                .sameSite("None")
+                .sameSite("Lax")
                 .build();
 
         return ResponseEntity.status(HttpStatus.OK).header(HttpHeaders.SET_COOKIE, responseCookie.toString()).body(jwt);

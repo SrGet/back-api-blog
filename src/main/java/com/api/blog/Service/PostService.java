@@ -19,6 +19,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 @Slf4j
@@ -26,13 +27,14 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class PostService {
 
-    private final MinIOService minIOService;
+
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final PostMapper postMapper;
     private final LikeService likeService;
     private final StringRedisTemplate redisTemplate;
     private final CommentService commentService;
+    private final CloudinaryService cloudinaryService;
 
     // Create Post
     @Transactional
@@ -41,13 +43,14 @@ public class PostService {
         User user = userRepository.findByUsername(username).orElseThrow(
                 () -> new ResourceNotFoundException("Couldn't find user: " + username));
 
-        String keyFile = minIOService.uploadFile(newPost.getFile());
+        Map<String,String> fileResponse = cloudinaryService.uploadImage(newPost.getFile());
 
         try {
 
             Post post = Post.builder()
                     .message(newPost.getMessage())
-                    .imageUrl(keyFile)
+                    .imageUrl(fileResponse.get("secureUrl"))
+                    .imagePublicId(fileResponse.get("imagePublicId"))
                     .deleted_at(null)
                     .user(user)
                     .build();
@@ -60,14 +63,13 @@ public class PostService {
         } catch (Exception e) {
 
             log.error("Post creation failed, deleting file. Reason: {}",e.getMessage());
-            minIOService.deleteFile(keyFile);
+            cloudinaryService.deleteImage(fileResponse.get("imagePublicId"));
 
             throw new RuntimeException("Error creating post: " + e.getMessage());
         }
 
     }
 
-    // Get single postDTO by ID
     public PostResponseDTO getPostDTO(Post post, User currentUser){
 
         boolean owner = currentUser.getUsername().equals(post.getUser().getUsername());
@@ -81,7 +83,6 @@ public class PostService {
     }
 
 
-     // Delete user post
     public void delete (Long postId,String currentUser){
 
         Post post = postRepository.findById(postId).orElseThrow(() -> new ResourceNotFoundException("Post not found."));
@@ -98,15 +99,14 @@ public class PostService {
         post.setDeleted_at(LocalDateTime.now());
 
         if(post.getImageUrl() != null){
-            minIOService.deleteFile(post.getImageUrl());
+            cloudinaryService.deleteImage(post.getImagePublicId());
             post.setImageUrl(null);
         }
         postRepository.save(post);
-        log.info("Soft-deleting successful for post: {} ", postId);
         redisTemplate.opsForValue().decrement("posts:amount:" + post.getUser().getId());
     }
 
-    // Update Post
+
     public PostResponseDTO update(EditPostDTO editPostDTO, String currentUsername){
 
         User user = userRepository.findByUsername(currentUsername).orElseThrow(
@@ -126,7 +126,7 @@ public class PostService {
 
     }
 
-    // Get LastsPosts
+
     public Page<Post> getLastsPosts(Pageable pageable){
         return postRepository.findPostsWithUsers(pageable);
 
