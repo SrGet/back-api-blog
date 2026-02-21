@@ -6,6 +6,7 @@ target/
 
 ### .properties ###
 src/main/resources/application.properties
+docker-compose.yml
 
 ### STS ###
 .apt_generated

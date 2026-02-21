@@ -38,6 +38,7 @@ services:
       SPRING_DATASOURCE_USERNAME: domino123
       SPRING_DATASOURCE_PASSWORD: domino123
       SPRING_REDIS_URL: rediss://default:AZxAAAIncDI5YzY0NTU3NTc0Zjc0MmVkODc1OWIzMjBiYzlhMzgwMnAyNDAwMDA@major-mastodon-40000.upstash.io:6379
+      JWT_SECRET: JWT_SECRET
 
 
 networks:
