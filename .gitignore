@@ -1,40 +1,25 @@
-HELP.md
+### Maven ###
 target/
 .mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
 
-### .properties ###
-src/main/resources/application.properties
-docker-compose.yml
+### Environment ###
+.env
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
+### Logs ###
+*.log
+logs/
 
-### IntelliJ IDEA ###
-.idea
-*.iws
+### OS ###
+.DS_Store
+Thumbs.db
+
+### IDE ###
+.idea/
 *.iml
-*.ipr
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### VS Code ###
 .vscode/
+.classpath
+.project
+.settings/
 
-## Logs ##
-/Logs
+### Docker ###
+docker-compose.override.yml
