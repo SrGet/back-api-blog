@@ -49,21 +49,24 @@ public class PostService {
 
             Post post = Post.builder()
                     .message(newPost.getMessage())
-                    .imageUrl(fileResponse.get("secureUrl"))
-                    .imagePublicId(fileResponse.get("imagePublicId"))
+                    .imageUrl(fileResponse != null ? fileResponse.get("secureUrl") : null)
+                    .imagePublicId(fileResponse != null ? fileResponse.get("imagePublicId") : null)
                     .deleted_at(null)
                     .user(user)
                     .build();
 
             Post postCreated = postRepository.save(post);
-            log.info("Post creation successful. Returning DTO");
+
             redisTemplate.opsForValue().increment("posts:amount:" + user.getId());
             return getPostDTO(postCreated, user);
 
         } catch (Exception e) {
 
-            log.error("Post creation failed, deleting file. Reason: {}",e.getMessage());
-            cloudinaryService.deleteImage(fileResponse.get("imagePublicId"));
+            log.error("Post creation failed. Reason: {}",e.getMessage());
+            if(fileResponse != null){
+                cloudinaryService.deleteImage(fileResponse.get("imagePublicId"));
+            }
+
 
             throw new RuntimeException("Error creating post: " + e.getMessage());
         }
