@@ -4,8 +4,10 @@ import com.api.blog.ErrorHandling.customExceptions.ResourceNotFoundException;
 import com.api.blog.DTOs.LikeResponseDTO;
 import com.api.blog.Model.*;
 import com.api.blog.Repositories.*;
+import com.api.blog.notifications.events.LikePostEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +26,7 @@ public class LikeService {
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
     private final StringRedisTemplate redisTemplate;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
 
     @Transactional
@@ -49,6 +52,10 @@ public class LikeService {
                 .build();
 
         likePostRepository.save(like);
+
+        applicationEventPublisher.publishEvent(new LikePostEvent(user, post.getUser()));
+
+
         Long likesAmount = redisTemplate.opsForValue().increment("post:likes:amount:" + idPost);
         return LikeResponseDTO.builder()
                 .liked(true)

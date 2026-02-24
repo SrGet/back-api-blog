@@ -4,6 +4,7 @@ import com.api.blog.DTOs.NotificationResponse;
 import com.api.blog.ErrorHandling.customExceptions.ResourceNotFoundException;
 import com.api.blog.Mappers.NotificationMapper;
 import com.api.blog.Model.Notification;
+import com.api.blog.Model.Post;
 import com.api.blog.Model.User;
 import com.api.blog.Repositories.NotificationRepository;
 import com.api.blog.Repositories.UserRepository;
@@ -37,6 +38,23 @@ public class NotificationService {
 
         String keyNotify = "notifications:unread:" + followed.getId();
         redisTemplate.opsForValue().increment(keyNotify);
+
+    }
+
+    public void createLikePostNotification(User likedBy, User recipient){
+
+        Notification notification = Notification.builder()
+                .sender(likedBy)
+                .recipient(recipient)
+                .message(likedBy.getUsername() + " has liked your post.")
+                .alreadyRead(false)
+                .build();
+
+
+        notificationRepository.save(notification);
+        redisTemplate.opsForValue().increment("notifications:unread:" + recipient.getId());
+
+
 
     }
 
