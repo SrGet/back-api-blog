@@ -43,8 +43,8 @@ public class AuthService {
 
         } catch (Exception e) {
 
-            log.info("Login failed for user {}. Reason: {}",loginRequest.getUsername(),e.getMessage());
-            throw new RuntimeException(e);
+            log.info("Login failed for user {}. Reason: {}",loginRequest.getUsername(), e.getMessage());
+            throw new ResourceNotFoundException(e.getMessage());
         }
 
         UserDetails user = userService.getUserByUsername(loginRequest.getUsername());

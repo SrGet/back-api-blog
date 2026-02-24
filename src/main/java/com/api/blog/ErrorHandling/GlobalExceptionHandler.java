@@ -16,7 +16,7 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ValidationErrorResponse> handleValidationException(MethodArgumentNotValidException ex){
+    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex){
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getFieldErrors().forEach(error -> {
             String fieldName = error.getField();
@@ -24,24 +24,31 @@ public class GlobalExceptionHandler {
             errors.put(fieldName,errorMessage);
         });
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ValidationErrorResponse(errors));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(errors));
 
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ResourceNotFoundResponse> handleNoSuchElementException(ResourceNotFoundException ex){
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResourceNotFoundResponse(ex.getMessage()));
+    public ResponseEntity<ErrorResponse> handleNoSuchElementException(ResourceNotFoundException ex){
+        Map<String,String> errors = new HashMap<>();
+        errors.put("ResourceNotFound", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(errors));
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<AccessDeniedResponse>handleAccessDeniedException(AccessDeniedException ex){
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new AccessDeniedResponse(ex.getMessage()));
+    public ResponseEntity<ErrorResponse>handleAccessDeniedException(AccessDeniedException ex){
+        Map<String,String> errors = new HashMap<>();
+        errors.put("AccessDenied", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(errors));
 
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<IllegalArgumentResponse> handleIllegalArgumentException(IllegalArgumentException ex){
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new IllegalArgumentResponse(ex.getMessage()));
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex){
+        Map<String,String> errors = new HashMap<>();
+        errors.put("IllegalArgument", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(errors));
 
     }
 }
