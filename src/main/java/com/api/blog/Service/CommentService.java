@@ -52,8 +52,8 @@ public class CommentService {
                 .user(currentUser)
                 .post(post)
                 .message(newComment.getMessage())
-                .imgUrl(uploadResponse.get("secure_url"))
-                .imagePublicId(uploadResponse.get("public_id"))
+                .imgUrl(uploadResponse != null ? uploadResponse.get("secureUrl") : null)
+                .imagePublicId(uploadResponse != null ? uploadResponse.get("imagePublicId") : null)
                 .build();
 
         try{

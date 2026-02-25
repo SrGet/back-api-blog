@@ -8,6 +8,7 @@ import com.api.blog.Model.Post;
 import com.api.blog.Model.User;
 import com.api.blog.Repositories.NotificationRepository;
 import com.api.blog.Repositories.UserRepository;
+import com.api.blog.Utils.RedisKeys;
 import jakarta.persistence.Table;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,8 +37,8 @@ public class NotificationService {
                 .build();
         notificationRepository.save(notification);
 
-        String keyNotify = "notifications:unread:" + followed.getId();
-        redisTemplate.opsForValue().increment(keyNotify);
+
+        redisTemplate.opsForValue().increment(RedisKeys.notificationsUnread(followed.getId()));
 
     }
 
@@ -50,11 +51,8 @@ public class NotificationService {
                 .alreadyRead(false)
                 .build();
 
-
         notificationRepository.save(notification);
-        redisTemplate.opsForValue().increment("notifications:unread:" + recipient.getId());
-
-
+        redisTemplate.opsForValue().increment(RedisKeys.notificationsUnread(recipient.getId()));
 
     }
 
@@ -70,8 +68,7 @@ public class NotificationService {
         }
 
 
-        String keyNotify = "notifications:unread:" + current.getId();
-        redisTemplate.delete(keyNotify);
+        redisTemplate.delete(RedisKeys.notificationsUnread(current.getId()));
 
         notificationRepository.setAlreadyReadAsTrueByRecipient(current);
 
@@ -82,12 +79,12 @@ public class NotificationService {
     public Long getCount(String currentUser){
         User current = userRepository.findByUsername(currentUser).orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        String stringCount = redisTemplate.opsForValue().get("notifications:unread:" + current.getId());
+        String stringCount = redisTemplate.opsForValue().get(RedisKeys.notificationsUnread(current.getId()));
         if(stringCount != null){
             return Long.parseLong(stringCount);
         }
         Long countDb = notificationRepository.countByRecipientAndAlreadyReadFalse(current);
-        redisTemplate.opsForValue().set("notifications:unread:" + current.getId(), countDb.toString());
+        redisTemplate.opsForValue().set(RedisKeys.notificationsUnread(current.getId()), countDb.toString());
         return countDb;
     }
 }

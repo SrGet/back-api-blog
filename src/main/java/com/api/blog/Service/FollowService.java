@@ -6,6 +6,7 @@ import com.api.blog.Model.Follows;
 import com.api.blog.Model.User;
 import com.api.blog.Repositories.FollowRepository;
 import com.api.blog.Repositories.UserRepository;
+import com.api.blog.Utils.RedisKeys;
 import com.api.blog.notifications.events.FollowEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,8 +46,8 @@ public class FollowService {
 
             followRepository.deleteByFollowerAndFollowed(currentUser,followedUser);
 
-            Long followersCount = redisTemplate.opsForValue().decrement("followers:amount:" + followedUser.getId());
-            redisTemplate.opsForValue().decrement("followed:amount:" + currentUser.getId());
+            Long followersCount = redisTemplate.opsForValue().decrement(RedisKeys.followersAmount(followedUser.getId()));
+            redisTemplate.opsForValue().decrement(RedisKeys.followingAmount(currentUser.getId()));
 
             return FollowResponseDTO.builder()
                     .followed(false)
@@ -65,8 +66,8 @@ public class FollowService {
         applicationEventPublisher.publishEvent(new FollowEvent(currentUser, followedUser));
 
 
-        Long followersCount = redisTemplate.opsForValue().increment("followers:amount:" + followedUser.getId());
-        redisTemplate.opsForValue().increment("following:amount:" + currentUser.getId());
+        Long followersCount = redisTemplate.opsForValue().increment(RedisKeys.followersAmount(followedUser.getId()));
+        redisTemplate.opsForValue().increment(RedisKeys.followingAmount(currentUser.getId()));
 
         return FollowResponseDTO.builder()
                 .followed(true)
@@ -76,25 +77,24 @@ public class FollowService {
     }
 
     public Long getFollowingCount(User follower){
-        String count = redisTemplate.opsForValue().get("following:amount:" + follower.getId());
-        log.info("FollowingCount: {}",count);
+        String count = redisTemplate.opsForValue().get(RedisKeys.followingAmount(follower.getId()));
         if (count != null){
             return Long.parseLong(count);
         }
         Long countDb = followRepository.countByFollower(follower);
-        redisTemplate.opsForValue().set("following:amount:" + follower.getId(), countDb.toString());
+        redisTemplate.opsForValue().set(RedisKeys.followingAmount(follower.getId()), countDb.toString());
         return countDb;
     }
 
     public Long getFollowersCount(User followed){
-        String count = redisTemplate.opsForValue().get("followers:amount:" + followed.getId());
+        String count = redisTemplate.opsForValue().get(RedisKeys.followersAmount(followed.getId()));
         log.info("FollowersCount: {}",count);
         if (count != null){
             return Long.parseLong(count);
         }
 
         Long countDb = followRepository.countByFollowed(followed);
-        redisTemplate.opsForValue().set("followers:amount:" + followed.getId(), countDb.toString());
+        redisTemplate.opsForValue().set(RedisKeys.followersAmount(followed.getId()), countDb.toString());
         return countDb;
     }
 

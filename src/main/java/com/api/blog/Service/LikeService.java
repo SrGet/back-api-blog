@@ -4,6 +4,7 @@ import com.api.blog.ErrorHandling.customExceptions.ResourceNotFoundException;
 import com.api.blog.DTOs.LikeResponseDTO;
 import com.api.blog.Model.*;
 import com.api.blog.Repositories.*;
+import com.api.blog.Utils.RedisKeys;
 import com.api.blog.notifications.events.LikePostEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +39,7 @@ public class LikeService {
 
         if(likePostRepository.existsByUserAndPost(user,post)){
             likePostRepository.deleteByUserAndPost(user,post);
-            Long likesAmount = redisTemplate.opsForValue().decrement("post:likes:amount:" + idPost);
+            Long likesAmount = redisTemplate.opsForValue().decrement(RedisKeys.postLikesAmount(idPost));
             return LikeResponseDTO.builder()
                     .liked(false)
                     .likeAmount(likesAmount)
@@ -56,7 +57,7 @@ public class LikeService {
         applicationEventPublisher.publishEvent(new LikePostEvent(user, post.getUser()));
 
 
-        Long likesAmount = redisTemplate.opsForValue().increment("post:likes:amount:" + idPost);
+        Long likesAmount = redisTemplate.opsForValue().increment(RedisKeys.postLikesAmount(idPost));
         return LikeResponseDTO.builder()
                 .liked(true)
                 .likeAmount(likesAmount)
@@ -110,24 +111,24 @@ public class LikeService {
     }
 
     public Long getPostLikesCount(Post post){
-        String count = redisTemplate.opsForValue().get("post:likes:amount:" + post.getId());
+        String count = redisTemplate.opsForValue().get(RedisKeys.postLikesAmount(post.getId()));
         if (count != null){
             return Long.parseLong(count);
         }
 
         Long dbCount = likePostRepository.countByPost(post);
-        redisTemplate.opsForValue().set("post:likes:amount:"+post.getId(), dbCount.toString());
+        redisTemplate.opsForValue().set(RedisKeys.postLikesAmount(post.getId()), dbCount.toString());
         return dbCount;
     }
 
     public Long getCommentLikesCount(Comments comment){
-        String count = redisTemplate.opsForValue().get("comment:likes:amount:" + comment.getId());
+        String count = redisTemplate.opsForValue().get(RedisKeys.commentLikesAmount(comment.getId()));
         if (count != null){
             return Long.parseLong(count);
         }
 
         Long dbCount = commentLikeRepository.countByComments(comment);
-        redisTemplate.opsForValue().set("comment:likes:amount:"+comment.getId(), dbCount.toString());
+        redisTemplate.opsForValue().set(RedisKeys.commentLikesAmount(comment.getId()), dbCount.toString());
         return dbCount;
     }
 

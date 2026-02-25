@@ -9,6 +9,7 @@ import com.api.blog.Model.Post;
 import com.api.blog.Model.User;
 import com.api.blog.Repositories.PostRepository;
 import com.api.blog.Repositories.UserRepository;
+import com.api.blog.Utils.RedisKeys;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,7 +58,7 @@ public class PostService {
 
             Post postCreated = postRepository.save(post);
 
-            redisTemplate.opsForValue().increment("posts:amount:" + user.getId());
+            redisTemplate.opsForValue().increment(RedisKeys.postsAmount(user.getId()));
             return getPostDTO(postCreated, user);
 
         } catch (Exception e) {
@@ -106,7 +107,7 @@ public class PostService {
             post.setImageUrl(null);
         }
         postRepository.save(post);
-        redisTemplate.opsForValue().decrement("posts:amount:" + post.getUser().getId());
+        redisTemplate.opsForValue().decrement(RedisKeys.notificationsUnread(post.getUser().getId()));
     }
 
 
@@ -143,12 +144,12 @@ public class PostService {
     }
 
     public Long postsCount(User user){
-        String count = redisTemplate.opsForValue().get("posts:amount:" + user.getId());
+        String count = redisTemplate.opsForValue().get(RedisKeys.notificationsUnread(user.getId()));
         if (count != null) {
             return  Long.parseLong(count);
         }
         Long dbCount = postRepository.countByUser(user);
-        redisTemplate.opsForValue().set("posts:amount:"+user.getId(),dbCount.toString());
+        redisTemplate.opsForValue().set(RedisKeys.notificationsUnread(user.getId()),dbCount.toString());
         return dbCount;
     }
 
