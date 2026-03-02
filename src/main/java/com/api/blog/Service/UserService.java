@@ -1,9 +1,9 @@
 package com.api.blog.Service;
 
-import com.api.blog.ErrorHandling.customExceptions.ResourceNotFoundException;
 import com.api.blog.DTOs.UserProfileDTO;
 import com.api.blog.Model.User;
 import com.api.blog.Repositories.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -34,10 +34,10 @@ public class UserService {
     public UserProfileDTO getProfile(String currentUser,String username){
 
         User authuser = userRepository.findByUsername(currentUser).orElseThrow(
-                () -> new ResourceNotFoundException("Couldn't find user: " + currentUser));
+                () -> new EntityNotFoundException("Couldn't find user: " + currentUser));
 
         User user = userRepository.findByUsername(username).orElseThrow(
-                () -> new ResourceNotFoundException("Couldn't find user: " + username));
+                () -> new EntityNotFoundException("Couldn't find user: " + username));
 
         Long followingAmount = followService.getFollowingCount(user);
         Long followersAmount = followService.getFollowersCount(user);
@@ -58,6 +58,6 @@ public class UserService {
 
 
     public UserDetails getUserByUsername(String username) {
-        return userRepository.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
 }

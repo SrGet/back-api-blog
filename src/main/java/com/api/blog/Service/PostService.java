@@ -1,7 +1,7 @@
 package com.api.blog.Service;
 
 import com.api.blog.DTOs.EditPostDTO;
-import com.api.blog.ErrorHandling.customExceptions.ResourceNotFoundException;
+import com.api.blog.ErrorHandling.customExceptions.CreatingResourceException;
 import com.api.blog.DTOs.NewPostDto;
 import com.api.blog.DTOs.PostResponseDTO;
 import com.api.blog.Mappers.PostMapper;
@@ -10,6 +10,7 @@ import com.api.blog.Model.User;
 import com.api.blog.Repositories.PostRepository;
 import com.api.blog.Repositories.UserRepository;
 import com.api.blog.Utils.RedisKeys;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +22,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 @Slf4j
 @Service
@@ -42,34 +42,30 @@ public class PostService {
     public PostResponseDTO create(NewPostDto newPost, String username){
 
         User user = userRepository.findByUsername(username).orElseThrow(
-                () -> new ResourceNotFoundException("Couldn't find user: " + username));
+                () -> new EntityNotFoundException("Couldn't find user: " + username));
 
         Map<String,String> fileResponse = cloudinaryService.uploadImage(newPost.getFile());
 
+        Post post = Post.builder()
+                .message(newPost.getMessage())
+                .imageUrl(fileResponse != null ? fileResponse.get("secureUrl") : null)
+                .imagePublicId(fileResponse != null ? fileResponse.get("imagePublicId") : null)
+                .deleted_at(null)
+                .user(user)
+                .build();
+
         try {
-
-            Post post = Post.builder()
-                    .message(newPost.getMessage())
-                    .imageUrl(fileResponse != null ? fileResponse.get("secureUrl") : null)
-                    .imagePublicId(fileResponse != null ? fileResponse.get("imagePublicId") : null)
-                    .deleted_at(null)
-                    .user(user)
-                    .build();
-
             Post postCreated = postRepository.save(post);
-
             redisTemplate.opsForValue().increment(RedisKeys.postsAmount(user.getId()));
             return getPostDTO(postCreated, user);
 
         } catch (Exception e) {
 
-            log.error("Post creation failed. Reason: {}",e.getMessage());
             if(fileResponse != null){
                 cloudinaryService.deleteImage(fileResponse.get("imagePublicId"));
             }
+            throw new CreatingResourceException("Error creating post.", post);
 
-
-            throw new RuntimeException("Error creating post: " + e.getMessage());
         }
 
     }
@@ -89,7 +85,7 @@ public class PostService {
 
     public void delete (Long postId,String currentUser){
 
-        Post post = postRepository.findById(postId).orElseThrow(() -> new ResourceNotFoundException("Post not found."));
+        Post post = postRepository.findById(postId).orElseThrow(() -> new EntityNotFoundException("Post not found."));
 
 
         if(!post.getUser().getUsername().equals(currentUser)){
@@ -114,9 +110,9 @@ public class PostService {
     public PostResponseDTO update(EditPostDTO editPostDTO, String currentUsername){
 
         User user = userRepository.findByUsername(currentUsername).orElseThrow(
-                () -> new ResourceNotFoundException("Couldn't find user: " + currentUsername));
+                () -> new EntityNotFoundException("Couldn't find user: " + currentUsername));
 
-        Post oldPost = postRepository.findById(editPostDTO.getPostId()).orElseThrow(() -> new NoSuchElementException("Post not found."));
+        Post oldPost = postRepository.findById(editPostDTO.getPostId()).orElseThrow(() -> new EntityNotFoundException("Post not found."));
 
         if(!oldPost.getUser().getUsername().equals(user.getUsername())){
             throw new AccessDeniedException("You are not allowed to delete this post.");
@@ -138,7 +134,7 @@ public class PostService {
 
     public Page<Post> getUserPosts(Pageable pageable, String username){
         User user = userRepository.findByUsername(username).orElseThrow(
-                () -> new ResourceNotFoundException("Couldn't find user: " + username));
+                () -> new EntityNotFoundException("Couldn't find user: " + username));
         return postRepository.findAllByUserId(pageable, user.getId());
 
     }

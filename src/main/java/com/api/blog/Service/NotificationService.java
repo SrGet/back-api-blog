@@ -1,15 +1,13 @@
 package com.api.blog.Service;
 
 import com.api.blog.DTOs.NotificationResponse;
-import com.api.blog.ErrorHandling.customExceptions.ResourceNotFoundException;
 import com.api.blog.Mappers.NotificationMapper;
 import com.api.blog.Model.Notification;
-import com.api.blog.Model.Post;
 import com.api.blog.Model.User;
 import com.api.blog.Repositories.NotificationRepository;
 import com.api.blog.Repositories.UserRepository;
 import com.api.blog.Utils.RedisKeys;
-import jakarta.persistence.Table;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -59,7 +57,7 @@ public class NotificationService {
     @Transactional
     public Page<NotificationResponse> getNotifications(String currentUser, Pageable pageable){
 
-        User current = userRepository.findByUsername(currentUser).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        User current = userRepository.findByUsername(currentUser).orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         Page<Notification> notifications = notificationRepository.findAllByRecipientOrderByCreatedAtDesc(current, pageable);
 
@@ -77,7 +75,7 @@ public class NotificationService {
     }
 
     public Long getCount(String currentUser){
-        User current = userRepository.findByUsername(currentUser).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        User current = userRepository.findByUsername(currentUser).orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         String stringCount = redisTemplate.opsForValue().get(RedisKeys.notificationsUnread(current.getId()));
         if(stringCount != null){

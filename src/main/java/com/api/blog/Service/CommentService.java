@@ -1,17 +1,16 @@
 package com.api.blog.Service;
 
-import com.api.blog.DTOs.LikeResponseDTO;
-import com.api.blog.ErrorHandling.customExceptions.ResourceNotFoundException;
+import com.api.blog.ErrorHandling.customExceptions.CreatingResourceException;
 import com.api.blog.DTOs.NewCommentRequest;
 import com.api.blog.DTOs.CommentResponse;
 import com.api.blog.Mappers.CommentMapper;
-import com.api.blog.Model.CommentLike;
 import com.api.blog.Model.Comments;
 import com.api.blog.Model.Post;
 import com.api.blog.Model.User;
 import com.api.blog.Repositories.CommentRepository;
 import com.api.blog.Repositories.PostRepository;
 import com.api.blog.Repositories.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -20,7 +19,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -40,10 +38,11 @@ public class CommentService {
 
     public CommentResponse create(String currentUsername, NewCommentRequest newComment){
 
-        Post post = postRepository.findById(newComment.getPostId()).orElseThrow(() -> new NoSuchElementException("Post not found."));
+        Post post = postRepository.findById(newComment.getPostId()).orElseThrow(
+                () -> new EntityNotFoundException("Post not found: " + newComment.getPostId()));
 
         User currentUser = userRepository.findByUsername(currentUsername).orElseThrow(
-                () -> new ResourceNotFoundException("Couldn't find user: " + currentUsername));
+                () -> new EntityNotFoundException("User not found: " + currentUsername));
 
 
         Map<String,String> uploadResponse = cloudinaryService.uploadImage(newComment.getFile());
@@ -61,8 +60,7 @@ public class CommentService {
             redisTemplate.opsForValue().increment("comments:amount:" + post.getId());
             return getCommentDTO(commentCreated, post.getId(),currentUser);
         } catch (Exception e) {
-            log.error("Couldn't save post. Deleting file. Reason: {}", e.getMessage());
-            throw new RuntimeException(e);
+            throw new CreatingResourceException("Error creating comment.", comment);
         }
     }
 
@@ -77,7 +75,7 @@ public class CommentService {
 
     public Page<CommentResponse> getPostComments(int pageNo, int pageSize, Long postId, String currentUser){
         User authUser = userRepository.findByUsername(currentUser).orElseThrow(
-                () -> new ResourceNotFoundException("Couldn't find user: " + currentUser));
+                () -> new EntityNotFoundException("Couldn't find user: " + currentUser));
 
         Page<Comments> commentsList = commentRepository.findAllByPostId(PageRequest.of(pageNo,pageSize), postId);
         if(commentsList != null){
@@ -90,7 +88,7 @@ public class CommentService {
 
     public void delete(Long commentId){
         Comments comment = commentRepository.findById(commentId).orElseThrow(
-                () -> new ResourceNotFoundException("Comment not found"));
+                () -> new EntityNotFoundException("Comment not found"));
 
         comment.setDeleted_at(LocalDateTime.now());
         commentRepository.save(comment);

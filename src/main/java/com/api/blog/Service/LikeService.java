@@ -1,11 +1,11 @@
 package com.api.blog.Service;
 
-import com.api.blog.ErrorHandling.customExceptions.ResourceNotFoundException;
 import com.api.blog.DTOs.LikeResponseDTO;
 import com.api.blog.Model.*;
 import com.api.blog.Repositories.*;
 import com.api.blog.Utils.RedisKeys;
 import com.api.blog.notifications.events.LikePostEvent;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -35,7 +35,7 @@ public class LikeService {
 
         Post post = postRepository.findById(idPost).orElseThrow(() -> new NoSuchElementException("Post no found for id: " + idPost));
         User user = userRepository.findByUsername(currentUser).orElseThrow(
-                () -> new ResourceNotFoundException("Couldn't find user: " + currentUser));
+                () -> new EntityNotFoundException("Couldn't find user: " + currentUser));
 
         if(likePostRepository.existsByUserAndPost(user,post)){
             likePostRepository.deleteByUserAndPost(user,post);
@@ -69,10 +69,10 @@ public class LikeService {
     public LikeResponseDTO toggleCommentLike(Long commentId, String currentUser){
 
         User authUser = userRepository.findByUsername(currentUser).orElseThrow(
-                () -> new ResourceNotFoundException("Couldn't find user: " + currentUser));
+                () -> new EntityNotFoundException("Couldn't find user: " + currentUser));
 
         Comments comment = commentRepository.findById(commentId).orElseThrow(
-                () -> new ResourceNotFoundException("Comment not found."));
+                () -> new EntityNotFoundException("Comment not found."));
 
         // ** Delete like if already liked**
         if(commentLikeRepository.existsByUserAndComments(authUser,comment)){

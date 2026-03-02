@@ -3,11 +3,11 @@ package com.api.blog.Service;
 import com.api.blog.DTOs.JwtResponse;
 import com.api.blog.DTOs.LoginRequestDTO;
 import com.api.blog.DTOs.UserDto;
-import com.api.blog.ErrorHandling.customExceptions.ResourceNotFoundException;
 import com.api.blog.Model.RefreshToken;
 import com.api.blog.Model.Roles;
 import com.api.blog.Model.User;
 import com.api.blog.Repositories.RefreshTokenRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +44,7 @@ public class AuthService {
         } catch (Exception e) {
 
             log.info("Login failed for user {}. Reason: {}",loginRequest.getUsername(), e.getMessage());
-            throw new ResourceNotFoundException(e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
 
         UserDetails user = userService.getUserByUsername(loginRequest.getUsername());
@@ -91,7 +91,7 @@ public class AuthService {
 
         // Validating refresh token
         RefreshToken token = refreshTokenRepository.findByToken(refreshTokenValue).orElseThrow(
-                () -> new ResourceNotFoundException("Token not found"));
+                () -> new EntityNotFoundException("Token not found"));
         if (token.getExpireDate().isBefore(Instant.now())) {
             refreshTokenRepository.delete(token);
             throw new RuntimeException("Refresh token expired");

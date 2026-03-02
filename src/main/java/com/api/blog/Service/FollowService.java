@@ -1,6 +1,5 @@
 package com.api.blog.Service;
 
-import com.api.blog.ErrorHandling.customExceptions.ResourceNotFoundException;
 import com.api.blog.DTOs.FollowResponseDTO;
 import com.api.blog.Model.Follows;
 import com.api.blog.Model.User;
@@ -8,14 +7,13 @@ import com.api.blog.Repositories.FollowRepository;
 import com.api.blog.Repositories.UserRepository;
 import com.api.blog.Utils.RedisKeys;
 import com.api.blog.notifications.events.FollowEvent;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -32,10 +30,10 @@ public class FollowService {
         log.info("Thread MethodToggleFollow: {}", Thread.currentThread().getName());
 
         User currentUser = userRepository.findByUsername(follower).orElseThrow(
-                () -> new ResourceNotFoundException("Couldn't find user: " + follower));
+                () -> new EntityNotFoundException("Couldn't find user: " + follower));
 
         User followedUser = userRepository.findByUsername(followTarget).orElseThrow(
-                () -> new ResourceNotFoundException("Couldn't find user: " + followTarget));
+                () -> new EntityNotFoundException("Couldn't find user: " + followTarget));
 
         if(currentUser.getId().equals(followedUser.getId())){
             throw  new IllegalArgumentException("Cannot follow yourself :/");
