@@ -36,26 +36,6 @@ public class PostMapper {
                 .modifiedAt(post.getModifiedAt())
                 .build();
     }
-    /*
-
-      PostResponseDTO.builder()
-            .id(post.getId())
-            .message(post.getMessage())
-            .imgPostUrl(post.getImageUrl() != null ? "/file/"+post.getImageUrl() : null)
-            .imgUserUrl(imgUserUrl != null ? "/file/"+post.getImageUrl() : null)
-            .user(post.getUser().getUsername())
-            .likes(likesAmount)
-                .commentsAmount(commentsAmount)
-                .likedByCurrentUser(isLikedByCurrentUser)
-                .owner(owner)
-                .deleted_at(post.getDeleted_at())
-            .createdAt(post.getCreatedAt())
-            .modifiedAt(post.getModifiedAt())
-            .build();
-    */
-
-
-
 
 
 

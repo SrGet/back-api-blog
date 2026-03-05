@@ -9,6 +9,10 @@ public final class RedisKeys {
         return "posts:amount:" + userId;
     }
 
+    public static String commentsAmount(Long userId){
+        return "comments:amount:" + userId;
+    }
+
     public static String postLikesAmount(Long userId){
         return "post:likes:amount:" + userId;
     }

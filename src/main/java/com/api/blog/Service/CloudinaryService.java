@@ -23,7 +23,6 @@ public class CloudinaryService {
 
             if (file != null){
                 Map<?,?> uploadResult = cloudinary.uploader().upload(file.getBytes(), Map.of("folder", "social-app"));
-                log.info("UploadResult: {}", uploadResult);
 
                 return Map.of("secureUrl",uploadResult.get("secure_url").toString(),
                         "imagePublicId", uploadResult.get("public_id").toString());

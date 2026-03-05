@@ -10,6 +10,7 @@ import com.api.blog.Model.User;
 import com.api.blog.Repositories.CommentRepository;
 import com.api.blog.Repositories.PostRepository;
 import com.api.blog.Repositories.UserRepository;
+import com.api.blog.Utils.RedisKeys;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,7 +58,7 @@ public class CommentService {
 
         try{
             Comments commentCreated = commentRepository.save(comment);
-            redisTemplate.opsForValue().increment("comments:amount:" + post.getId());
+            redisTemplate.opsForValue().increment(RedisKeys.commentsAmount(post.getId()));
             return getCommentDTO(commentCreated, post.getId(),currentUser);
         } catch (Exception e) {
             throw new CreatingResourceException("Error creating comment.", comment);
@@ -92,18 +93,18 @@ public class CommentService {
 
         comment.setDeleted_at(LocalDateTime.now());
         commentRepository.save(comment);
-        redisTemplate.opsForValue().decrement("comments:amount:"+ comment.getPost().getId());
+        redisTemplate.opsForValue().decrement(RedisKeys.commentsAmount(comment.getPost().getId()));
 
 
     }
 
     public Long getCommentsAmount(Long idPost){
-        String commentsAmount = redisTemplate.opsForValue().get("comments:amount:"+idPost);
+        String commentsAmount = redisTemplate.opsForValue().get(RedisKeys.commentsAmount(idPost));
         if (commentsAmount != null){
             return Long.parseLong(commentsAmount);
         }
         Long dbCount = commentRepository.countByPostId(idPost);
-        redisTemplate.opsForValue().set("comments:amount:"+idPost, dbCount.toString());
+        redisTemplate.opsForValue().set(RedisKeys.commentsAmount(idPost), dbCount.toString());
         return dbCount;
     }
 

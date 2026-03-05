@@ -44,7 +44,11 @@ public class PostService {
         User user = userRepository.findByUsername(username).orElseThrow(
                 () -> new EntityNotFoundException("Couldn't find user: " + username));
 
-        Map<String,String> fileResponse = cloudinaryService.uploadImage(newPost.getFile());
+        Map<String,String> fileResponse = null;
+
+        if (newPost.getFile() != null && !newPost.getFile().isEmpty()){
+            fileResponse = cloudinaryService.uploadImage(newPost.getFile());
+        }
 
         Post post = Post.builder()
                 .message(newPost.getMessage())
@@ -57,7 +61,8 @@ public class PostService {
         try {
             Post postCreated = postRepository.save(post);
             redisTemplate.opsForValue().increment(RedisKeys.postsAmount(user.getId()));
-            return getPostDTO(postCreated, user);
+            return postMapper.toResponseDto(postCreated, false, true, user.getProfileImgKey(),
+                    0L, 0L);
 
         } catch (Exception e) {
 

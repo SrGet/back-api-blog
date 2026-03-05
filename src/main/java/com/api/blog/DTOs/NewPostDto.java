@@ -1,13 +1,13 @@
 package com.api.blog.DTOs;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.Value;
+import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
-@Value
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class NewPostDto {
 
      String message;

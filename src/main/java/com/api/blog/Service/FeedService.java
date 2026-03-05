@@ -25,24 +25,16 @@ public class FeedService {
 
 
     public Page<PostResponseDTO> getUserFeed(int pageNo, int pageSize, String currentUser){
-
         User authUser = userRepository.findByUsername(currentUser).orElseThrow(() -> new NoSuchElementException("User not found."));
-
         Page<Post> posts = postService.getLastsPosts(PageRequest.of(pageNo-1,pageSize));
-
-        log.info("Getting lastPosts successful with pageNo: {}, pageSize: {}, Returning DTOs",pageNo-1,pageSize);
 
         return posts.map(post -> postService.getPostDTO(post, authUser));
 
     }
 
     public Page<PostResponseDTO> getUserFeed(int pageNo, int pageSize, String currentUsername, String targetUsername){
-
         User authUser = userRepository.findByUsername(currentUsername).orElseThrow(() -> new NoSuchElementException("User not found."));
-
         Page<Post> posts = postService.getUserPosts(PageRequest.of(pageNo-1,pageSize), targetUsername);
-
-        log.info("Getting user posts successful with pageNo: {}, pageSize: {}, Returning DTOs",pageNo-1,pageSize);
 
         return posts.map(post -> postService.getPostDTO(post, authUser));
 
