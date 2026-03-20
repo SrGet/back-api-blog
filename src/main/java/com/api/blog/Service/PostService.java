@@ -108,7 +108,7 @@ public class PostService {
             post.setImageUrl(null);
         }
         postRepository.save(post);
-        redisTemplate.opsForValue().decrement(RedisKeys.notificationsUnread(post.getUser().getId()));
+        redisTemplate.opsForValue().decrement(RedisKeys.postsAmount(post.getUser().getId()));
     }
 
 
