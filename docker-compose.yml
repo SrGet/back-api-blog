@@ -1,0 +1,59 @@
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    ports:
+      - '3307:3306'
+    networks:
+      - blog-network
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  frontend:
+    build:
+      context: ../FrontEndApiBlog/frontApiBlog
+      dockerfile: Dockerfile
+    ports:
+      - '5173:80'
+    networks:
+      - blog-network
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '8080:8080'
+    depends_on:
+      - mysql
+    networks:
+      - blog-network
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_REDIS_HOST: ${REDIS_HOST}
+      SPRING_REDIS_PORT: ${REDIS_PORT}
+      JWT_SECRET: ${JWT_SECRET}
+      CLOUDINARY_KEY: ${CLOUDINARY_URL}
+
+  redis:
+    image: redis:7.2.10-alpine
+    ports:
+      - '6379:6379'
+    networks:
+      - blog-network
+    volumes:
+      - redis_data:/data
+
+networks:
+  blog-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  redis_data:

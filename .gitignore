@@ -5,8 +5,7 @@ target/
 !**/src/test/**/target/
 
 ### .properties ###
-src/main/resources/application.properties
-docker-compose.yml
+.env
 
 ### STS ###
 .apt_generated
